@@ -2304,9 +2304,9 @@
 
                 tarjeta.innerHTML = '' +
                     '<div class="firma-card__titulo">' +
-                        '<h4><i class="fa fa-pencil"></i> ' + descripcionGrupo + '</h4>' +
+                        '<h5><i class="fa fa-pencil"></i> ' + descripcionGrupo + '</h5>' +
                         '<label class="firma-card__envio">' +
-                            '<input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + checkEnvio + ' ' + (esElaboradoPor ? 'disabled checked' : '') + '> Enviar como aprobador' +
+                            '<input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + checkEnvio + ' ' + (esElaboradoPor ? 'disabled checked' : '') + '> Incluir' +
                         '</label>' +
                     '</div>' +
                     (sinUsuarios ? sinUsuarios : '') +
@@ -3772,7 +3772,7 @@ function init(tableId) {
                 border-radius: 4px;
                 background: #fff;
                 box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
-                min-height: 140px;
+                min-height: 100px;
             }
 
             .reorden-controles {
@@ -3958,6 +3958,33 @@ function init(tableId) {
                 box-shadow: none;
                 border: 1px solid #eaeaea;
             }
+
+ .firma-card__fila-controles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto; /* persona | posición */
+    column-gap: 8px;
+    align-items: center;
+}
+
+/* Primer select (persona) ocupa toda la columna */
+.firma-card__fila-controles .form-control:first-child {
+    width: 100%;
+}
+
+/* Segundo select (posición) con un ancho mínimo consistente */
+.firma-card__fila-controles .form-control:last-child {
+    min-width: 120px; /* ajusta según te guste */
+}
+
+/* En móviles se apilan */
+@media (max-width: 600px) {
+    .firma-card__fila-controles {
+        grid-template-columns: 1fr;
+        row-gap: 6px;
+    }
+}
+
+
         </style>
         <div class="row">
             <!-- Main content -->

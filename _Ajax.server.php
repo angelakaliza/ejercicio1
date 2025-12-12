@@ -8357,7 +8357,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
     <!-- DESCRIPCIÃ“N / OBSERVACIONES -->
     <div class="col-sm-6">
         <div class="form-group">
-            <label class="control-label" for="observaciones">Descripcion</label>
+            <label class="control-label" for="observaciones">Observaciones o Descripcion</label>
             <textarea id="observaciones"
                       name="observaciones"
                       class="form-control"
@@ -8458,7 +8458,6 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                                         <label class="producto-no-registrado-label">
                                             <input type="checkbox" id="producto_no_registrado" name="producto_no_registrado" onchange="toggleProductoNoRegistrado(this.checked);" style="margin-right:8px;"> <strong>Producto no registrado</strong> (Ingrese manualmente los datos)
                                         </label>
-                                        <div id="infoBodegaNoRegistrado" class="text-muted" style="margin-top:6px; display:none;"></div>
                                     </div>
                                 </div>
                             </div>
