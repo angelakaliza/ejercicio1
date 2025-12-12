@@ -948,10 +948,48 @@
             }
         }
 
+        function obtenerPrioridadCargo(cargo) {
+            const nombre = normalizarTexto(cargo && cargo.nombre ? cargo.nombre : '');
+            if (nombre === 'elaborado por') {
+                return 1;
+            }
+            if (nombre === 'solicitado por') {
+                return 2;
+            }
+            return null;
+        }
+
+        function asegurarOrdenCargosPrioritarios() {
+            const prioridades = ['elaborado por', 'solicitado por'];
+            const idsPrioritarios = [];
+
+            prioridades.forEach(function(nombre) {
+                const cargo = gruposAprobadores.find(function(item) {
+                    return normalizarTexto(item.nombre) === nombre;
+                });
+
+                if (cargo) {
+                    idsPrioritarios.push(cargo.id);
+                }
+            });
+
+            if (!idsPrioritarios.length) {
+                return;
+            }
+
+            const restantes = ordenCargosSeleccionados.filter(function(id) {
+                return idsPrioritarios.indexOf(id) === -1;
+            });
+
+            ordenCargosSeleccionados = idsPrioritarios.concat(restantes);
+        }
+
         function ordenarCargosPorPreferencia(cargos) {
             if (!Array.isArray(cargos)) {
                 return [];
             }
+
+            asegurarOrdenCargosPrioritarios();
 
             const mapaOrden = {};
             ordenCargosSeleccionados.forEach(function(id, indice) {
@@ -959,6 +997,13 @@
             });
 
             return cargos.slice().sort(function(a, b) {
+                const prioridadA = obtenerPrioridadCargo(a);
+                const prioridadB = obtenerPrioridadCargo(b);
+
+                if (prioridadA !== null || prioridadB !== null) {
+                    return (prioridadA || Number.MAX_SAFE_INTEGER) - (prioridadB || Number.MAX_SAFE_INTEGER);
+                }
+
                 const ordenA = mapaOrden[a.id] || Number.MAX_SAFE_INTEGER;
                 const ordenB = mapaOrden[b.id] || Number.MAX_SAFE_INTEGER;
 
@@ -979,6 +1024,8 @@
             ordenCargosSeleccionados = ordenCargosSeleccionados.filter(function(id) {
                 return idsActuales.indexOf(id) !== -1;
             });
+
+            asegurarOrdenCargosPrioritarios();
 
             idsActuales.forEach(function(id) {
                 if (ordenCargosSeleccionados.indexOf(id) === -1) {
@@ -2228,9 +2275,11 @@
                     seleccion.enviar = true;
                 }
 
+                const esElaboradoPor = normalizarTexto(cargo.nombre) === 'elaborado por';
+
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'firma-card';
-                tarjeta.draggable = true;
+                tarjeta.draggable = !esElaboradoPor;
                 tarjeta.dataset.grupoId = cargo.id;
                 tarjeta.addEventListener('dragstart', iniciarArrastreCargo);
                 tarjeta.addEventListener('dragover', permitirArrastreCargo);
@@ -2238,7 +2287,8 @@
                 tarjeta.addEventListener('dragend', limpiarArrastreCargo);
                 const opcionesPosicion = ordenCargosSeleccionados.map(function(id, indice) {
                     const seleccionado = id === cargo.id ? 'selected' : '';
-                    return '<option value="' + indice + '" ' + seleccionado + '>Posición ' + (indice + 1) + '</option>';
+                    const bloqueado = esElaboradoPor ? 'disabled' : '';
+                    return '<option value="' + indice + '" ' + seleccionado + ' ' + bloqueado + '>Posición ' + (indice + 1) + '</option>';
                 }).join('');
                 const opciones = aprobadoresCargo.map(function(aprobador) {
                     const seleccionado = seleccion && seleccion.id === aprobador.id ? 'selected' : '';
@@ -2257,8 +2307,8 @@
                         '</div>' +
                     '</div>' +
                     (sinUsuarios ? sinUsuarios : '') +
-                    (aprobadoresCargo.length ? '<div class="form-group"><select class="form-control" data-grupo="' + cargo.id + '" onchange="actualizarSeleccionAprobador(\'' + cargo.id + '\', this.value);">' + opciones + '</select></div>' : '') +
-                    '<div class="checkbox"><label><input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + checkEnvio + '> Enviar como aprobador</label></div>';
+                    (aprobadoresCargo.length ? '<div class="form-group"><select class="form-control" data-grupo="' + cargo.id + '" ' + (esElaboradoPor ? 'disabled' : '') + ' onchange="actualizarSeleccionAprobador(\'' + cargo.id + '\', this.value);">' + opciones + '</select></div>' : '') +
+                    '<div class="checkbox"><label><input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + checkEnvio + ' ' + (esElaboradoPor ? 'disabled checked' : '') + '> Enviar como aprobador</label></div>';
 
                 contenedorTarjetas.appendChild(tarjeta);
             });
@@ -2285,7 +2335,7 @@
 
             const rolesRegistrados = [];
             const aprobadoresParaEnviar = aprobadoresSeleccionados.filter(function(item) {
-                return item.enviar !== false;
+                return item.enviar !== false || normalizarTexto(item.cargo) === 'elaborado por';
             }).map(function(item, indice) {
                 return Object.assign({}, item, {
                     nombre: formatearMayusculas(item.nombre),
@@ -2312,6 +2362,10 @@
         }
 
         function actualizarSeleccionAprobador(grupoId, aprobadorId) {
+            const cargo = gruposAprobadores.find(function(item) { return item.id === grupoId; });
+            if (cargo && normalizarTexto(cargo.nombre) === 'elaborado por') {
+                return;
+            }
             const sucursalIdActual = obtenerValorSucursalActual();
             const empresaIdActual = obtenerValorEmpresaActual();
             const aprobador = aprobadoresDisponibles.find(function(item) {
@@ -2341,6 +2395,10 @@
                 return item.grupoId === grupoId;
             });
             if (indice >= 0) {
+                const cargo = gruposAprobadores.find(function(item) { return item.id === grupoId; });
+                if (cargo && normalizarTexto(cargo.nombre) === 'elaborado por') {
+                    return;
+                }
                 aprobadoresSeleccionados[indice].enviar = enviar;
             }
             establecerAprobadoresEnvio();
@@ -2616,6 +2674,7 @@
                 if (codigoProducto) {
                     codigoProducto.value = '';
                     codigoProducto.readOnly = true;
+                    codigoProducto.classList.add('solo-lectura');
                 }
                 if (botonBuscar) {
                     botonBuscar.disabled = true;
@@ -2653,7 +2712,8 @@
                 }
                 if (codigoProducto) {
                     codigoProducto.value = '';
-                    codigoProducto.readOnly = false;
+                    codigoProducto.readOnly = true;
+                    codigoProducto.classList.add('solo-lectura');
                 }
                 if (botonBuscar) {
                     botonBuscar.disabled = false;
@@ -2731,17 +2791,7 @@
             var cod_nom = document.getElementById('codigo_producto').value;
 
             if (event.keyCode == 13 || event.keyCode == 115) { // F4
-                if (bodega != '' && sucursal != '' && precio != '') {
-                    var producto = document.getElementById('producto').value;
-
-                    $("#ModalProd").modal("show");
-                    // document.getElementById('codigo_producto').value = '';
-                    xajax_buscar_productos(xajax.getFormValues("form1"));
-
-                    // document.getElementById('producto').value = '';
-                } else {
-                    alertSwal('Ingrese Cliente - Bodega - Tipo de Precio', 'warning');
-                }
+                mostrarModalProductos();
             }
         }
 
@@ -2894,8 +2944,7 @@
             } else {
                 document.getElementById('producto').value = '';
             }
-            $("#ModalProd").modal("show");
-            xajax_buscar_productos(xajax.getFormValues("form1"));
+            mostrarModalProductos();
         }
 
         function centro_costo_22(id, event) {
@@ -2955,6 +3004,79 @@
                 campo.removeEventListener('keydown', intentarAgregarProductoConEnter);
                 campo.addEventListener('keydown', intentarAgregarProductoConEnter);
             });
+
+            window.removeEventListener('keydown', atajosModalProductos);
+            window.addEventListener('keydown', atajosModalProductos);
+        }
+
+        function atajosModalProductos(event) {
+            if (estadoFormulario !== 'creando') {
+                return;
+            }
+
+            const modalProductos = $('#ModalProd');
+
+            if (event.key === 'F4' || event.keyCode === 115) {
+                event.preventDefault();
+                mostrarModalProductos();
+            }
+
+            if (event.key === 'Escape' && modalProductos.length && modalProductos.hasClass('in')) {
+                event.preventDefault();
+                modalProductos.modal('hide');
+            }
+        }
+
+        function mostrarModalProductos() {
+            if (esProductoNoRegistrado()) {
+                return;
+            }
+
+            var bodega = document.getElementById("bodega");
+            var sucursal = document.getElementById("sucursal");
+            var precio = 1;
+
+            if (bodega && sucursal && bodega.value !== '' && sucursal.value !== '' && precio !== '') {
+                $("#ModalProd").modal("show");
+                xajax_buscar_productos(xajax.getFormValues("form1"));
+            } else {
+                alertSwal('Ingrese Cliente - Bodega - Tipo de Precio', 'warning');
+            }
+        }
+
+        function convertirCampoATextarea(id, filas) {
+            const campo = document.getElementById(id);
+            if (!campo) {
+                return;
+            }
+
+            if (campo.tagName.toLowerCase() === 'textarea') {
+                campo.rows = filas;
+                return;
+            }
+
+            const area = document.createElement('textarea');
+            area.id = campo.id;
+            area.name = campo.name || campo.id;
+            area.className = campo.className || 'form-control';
+            area.rows = filas;
+            area.value = campo.value || '';
+
+            campo.parentNode.replaceChild(area, campo);
+        }
+
+        function configurarCamposMultilinea() {
+            convertirCampoATextarea('motivo', 4);
+            convertirCampoATextarea('observaciones', 4);
+            convertirCampoATextarea('detalle', 3);
+        }
+
+        function configurarCamposProducto() {
+            const codigoProducto = document.getElementById('codigo_producto');
+            if (codigoProducto) {
+                codigoProducto.readOnly = true;
+                codigoProducto.classList.add('solo-lectura');
+            }
         }
 
         function cargar_portafolio(empresa, sucursal) {
@@ -3966,6 +4088,8 @@ function init(tableId) {
     <script>
         window.addEventListener('load', function() {
             inicializarAccesosRapidosProducto();
+            configurarCamposMultilinea();
+            configurarCamposProducto();
         });
         genera_formulario(); /*genera_detalle();genera_form_detalle();*/
     </script>

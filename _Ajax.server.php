@@ -8758,6 +8758,8 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
     $oReturn->script("toggleOmitirAprobaciones(false);");
     $oReturn->script('configurarSeccionAprobaciones();');
     $oReturn->script('ajustarCampoTipo();');
+    $oReturn->script('configurarCamposMultilinea();');
+    $oReturn->script('configurarCamposProducto();');
     $oReturn->script('toggleProductoNoRegistrado(false);');
 
     ///VALIDAICON EDIICON DE PEDIDO MODAL
