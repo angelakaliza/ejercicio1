@@ -1,0 +1,67 @@
+-Paso 6: Configurar Git para Cada Proyecto
+
+Ahora puedes configurar tu cuenta de GitHub por cada proyecto. Aquí te mostramos cómo hacerlo:
+
+En tu proyecto principal (donde usas tu cuenta principal):
+cd /ruta/a/tu/proyecto
+git config user.name "Tu Nombre Principal"
+git config user.email "tuemail@principal.com"
+git remote set-url origin git@github.com-principal:usuario/proyecto.git
+
+En tu proyecto secundario (donde usas tu cuenta secundaria):
+cd /ruta/a/tu/proyecto-secundario
+git config user.name "Tu Nombre Secundario"
+git config user.email "tuemail@secundaria.com"
+git remote set-url origin git@github.com-secundaria:usuario/proyecto.git
+
+
+
+
+Paso 7: Verificar la Configuración
+git config user.name
+git config user.email
+
+Para cada proyecto, puedes verificar la configuración con:
+
+ssh -T github.com-principal
+ssh -T github.com-secundaria
+
+
+
+# Clonando repositorio desde la cuenta principal
+git clone git@github.com-principal:usuario/repo.git
+
+# Clonando repositorio desde la cuenta secundaria
+git clone git@github.com-secundaria:usuario/repo.git
+
+git clone git@github.com:alkadmin/AGXPORT-NOTIFICACIONES.git
+
+
+
+
+
+
+
+# --- Cuenta personal ---
+Host github-personal
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/github_personal
+  IdentitiesOnly yes
+
+# --- Cuenta trabajo ---
+Host github-work
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/github_alkaliza
+  IdentitiesOnly yes
+
+
+
+# Repositorio personal
+git clone git@github-personal:usuario_personal/mi-repo.git
+
+# Repositorio de trabajo (Alkaliza)
+git clone git@github-work:alkadmin/apis-agxport.git
+
+
