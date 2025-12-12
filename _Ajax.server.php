@@ -6020,7 +6020,7 @@ function adjuntos_solicitud($id, $empresa, $sucursal, $tipo)
             do {
                 $prod_cod = $oIfx->f('dped_cod_prod');
                 $prod = $oIfx->f('dped_prod_nom');
-                $detalle = $oIfx->f('dped_det_dped');
+                $detalle = nl2br(htmlspecialchars($oIfx->f('dped_det_dped'), ENT_QUOTES, 'UTF-8'));
                 $adjuntos = $oIfx->f('dped_adj_dped');
 
 
@@ -8268,7 +8268,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                     <button type="button" class="btn btn-info btn-sm btn-accion-superior" id="btnUltimoPedido" title="Ãšltimo pedido" onclick="navegarPedido(\'ultimo\');">
                         <i class="fa fa-angle-double-right"></i>
                     </button>
-                    <button type="button" class="btn btn-primary btn-sm btn-accion-superior" onclick="javascript:editar_pedido();" >
+                    <button type="button" class="btn btn-primary btn-sm btn-accion-superior" id="btnEditarPedido" onclick="javascript:editar_pedido();" >
                         <span class="glyphicon glyphicon-pencil"></span>
                         Editar
                     </button>
@@ -8289,7 +8289,11 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                     </button>
                     <div class="input-group input-group-sm" style="max-width:200px; display:inline-flex; margin-left:8px;">
                         <input type="text" class="form-control" id="busquedaPedido" placeholder="Nro. pedido" onkeydown="buscarPedidoPorNumero(event);">
-
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" onclick="abrirModalPedidos();" title="Buscar pedido">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
                     </div>
                 </div>';
     $sHtml .= '</div>';
@@ -8416,14 +8420,14 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
     $sHtml .= '<div class="section-card section-card--nested">
                     <div class="section-card__header section-card__header--with-actions">
                         <h4 class="section-card__title"><i class="fa fa-check-square-o"></i> Aprobaciones</h4>
-                        <div class="section-card__actions">
-                            <label class="checkbox-inline" style="margin-right:10px;">
-<input type="checkbox" id="omitirAprobaciones" onchange="toggleOmitirAprobaciones(this.checked);"> No enviar aprobadores
+                        <div class="section-card__actions" id="accionesAprobaciones">
+                            <label class="checkbox-inline" style="margin-right:10px;" id="opcionAprobaciones">
+                                <input type="checkbox" id="omitirAprobaciones" onchange="toggleOmitirAprobaciones(this.checked);"> No enviar aprobadores
                             </label>
                             <button type="button" class="btn btn-default btn-sm" onclick="toggleSeccionAprobaciones();" title="Mostrar u ocultar aprobaciones">
                                 <i id="iconoToggleAprobaciones" class="fa fa-chevron-up"></i>
                             </button>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalAprobaciones();">
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAbrirGestionAprobaciones" onclick="abrirModalAprobaciones();">
                                 <i class="fa fa-user-plus"></i> Agregar aprobacion
                             </button>
                         </div>
@@ -10213,17 +10217,19 @@ function mostrar_grid($idempresa)
 
         $aDatos[$cont]['Eliminar'] = '<div align="center">' . $aValues['Eliminar'] . '</div>';
 
-        //bodega
-        $sql = 'select bode_nom_bode from saebode where bode_cod_bode = ? and bode_cod_empr = ?';
-        $data = array($bodegaId, $idempresa);
-        if ($oIfx->Query($sql, $data))
-            $bodega = $oIfx->f('bode_nom_bode');
-        $oIfx->Free();
-        $aDatos[$cont]['Bodega'] = $bodega;
-
         $esAuxiliar = ($aValues['Producto Auxiliar'] ?? 'No') === 'SI';
         $codigoAuxiliar = trim($aValues['Codigo Auxiliar'] ?? '');
         $descripcionAuxiliar = trim($aValues['Descripcion Auxiliar'] ?? '');
+
+        $aDatos[$cont]['Bodega'] = '';
+        if (!$esAuxiliar) {
+            $sql = 'select bode_nom_bode from saebode where bode_cod_bode = ? and bode_cod_empr = ?';
+            $data = array($bodegaId, $idempresa);
+            if ($oIfx->Query($sql, $data)) {
+                $aDatos[$cont]['Bodega'] = $oIfx->f('bode_nom_bode');
+            }
+            $oIfx->Free();
+        }
 
         $aDatos[$cont]['Producto auxiliar (SI/No)'] = $esAuxiliar ? 'SI' : 'No';
         $aDatos[$cont]['Codigo Item'] = ($esAuxiliar && $codigoAuxiliar) ? $codigoAuxiliar : $cod_prod;
@@ -10250,7 +10256,8 @@ function mostrar_grid($idempresa)
         $aDatos[$cont]['Cantidad Tmp'] = '<div align="right">' . $aValues['Cantidad Tmp'] . '</div>';
         $aDatos[$cont]['Costo Tmp'] = '<div align="right">' . $aValues['Costo Tmp'] . '</div>';
         $aDatos[$cont]['Cantidad'] = '<div align="right">' . $aValues['Cantidad'] . '</div>';
-        $aDatos[$cont]['Detalle'] = $aValues['Detalle'];
+        $detalle = isset($aValues['Detalle']) ? $aValues['Detalle'] : '';
+        $aDatos[$cont]['Detalle'] = nl2br(htmlspecialchars($detalle, ENT_QUOTES, 'UTF-8'));
         $aDatos[$cont]['Archivo'] = $aValues['Archivo'];
         $cont++;
     }

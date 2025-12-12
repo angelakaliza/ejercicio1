@@ -460,6 +460,11 @@
             xajax_buscar_pedido_por_numero(campoBusqueda.value, empresa, sucursal);
         }
 
+        function abrirModalPedidos() {
+            $("#ModalPedidos").modal("show");
+            xajax_lista_pedidos();
+        }
+
         function duplicarPedido() {
             const nota = document.getElementById('nota_compra');
             const ctrl = document.getElementById('ctrl');
@@ -859,6 +864,7 @@
             const botonActualizarInf = document.getElementById('btnActualizarPedidoInferior');
             const botonDuplicar = document.getElementById('btnDuplicarPedido');
             const botonImprimir = document.getElementById('btnImprimirPedido');
+            const botonEditar = document.getElementById('btnEditarPedido');
 
             const esCreacion = estadoFormulario === 'creando';
             const esEdicion = estadoFormulario === 'editando';
@@ -887,6 +893,10 @@
             if (botonImprimir) {
                 botonImprimir.style.display = esCreacion ? 'none' : '';
             }
+
+            if (botonEditar) {
+                botonEditar.style.display = esVista ? '' : 'none';
+            }
         }
 
         function setEstadoPendiente(estado) {
@@ -905,6 +915,7 @@
             aplicarColorEstado();
             aplicarHabilitacionCampos(estado !== 'creada');
             actualizarBotonesPorEstado();
+            actualizarAccionesAprobacionesPorEstado();
 
             if (estado === 'creada') {
                 // Pedido ya creado: el estado real de omitir aprobaciones
@@ -945,6 +956,25 @@
 
             if (aviso) {
                 aviso.style.display = aprobacionesDesactivadas ? 'block' : 'none';
+            }
+        }
+
+        function actualizarAccionesAprobacionesPorEstado() {
+            const esVista = estadoFormulario === 'creada';
+            const contenedor = document.getElementById('accionesAprobaciones');
+            const opcionAprobaciones = document.getElementById('opcionAprobaciones');
+            const botonAbrirGestion = document.getElementById('btnAbrirGestionAprobaciones');
+
+            if (opcionAprobaciones) {
+                opcionAprobaciones.style.display = esVista ? 'none' : '';
+            }
+
+            if (botonAbrirGestion) {
+                botonAbrirGestion.style.display = esVista ? 'none' : '';
+            }
+
+            if (contenedor) {
+                contenedor.classList.toggle('acciones-aprobaciones-solo-lectura', esVista);
             }
         }
 
@@ -2504,8 +2534,7 @@
             }
 
             // Caso 1: estoy en "Nuevo" (azul) u otro estado sin pedido cargado → abrir listado
-            $("#ModalPedidos").modal("show");
-            xajax_lista_pedidos();
+            abrirModalPedidos();
         }
 
 
