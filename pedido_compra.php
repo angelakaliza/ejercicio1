@@ -2299,16 +2299,21 @@
                 const checkEnvio = seleccion && seleccion.enviar === false ? '' : 'checked';
                 const sinUsuarios = aprobadoresCargo.length === 0 ? '<p class="text-muted">Sin usuarios registrados para este cargo.</p>' : '';
 
+                const selectorAprobadores = aprobadoresCargo.length ? '<select class="form-control" data-grupo="' + cargo.id + '" ' + (esElaboradoPor ? 'disabled' : '') + ' onchange="actualizarSeleccionAprobador(\'' + cargo.id + '\', this.value);">' + opciones + '</select>' : '';
+                const selectorPosicion = '<select class="form-control input-sm" onchange="cambiarPosicionCargo(\'' + cargo.id + '\', parseInt(this.value, 10));">' + opcionesPosicion + '</select>';
+
                 tarjeta.innerHTML = '' +
-                    '<h4><i class="fa fa-pencil"></i> ' + descripcionGrupo + '</h4>' +
-                    '<div class="reorden-controles">' +
-                        '<div class="reorden-dropdown">' +
-                            '<select class="form-control input-sm" onchange="cambiarPosicionCargo(\'' + cargo.id + '\', parseInt(this.value, 10));">' + opcionesPosicion + '</select>' +
-                        '</div>' +
+                    '<div class="firma-card__titulo">' +
+                        '<h4><i class="fa fa-pencil"></i> ' + descripcionGrupo + '</h4>' +
+                        '<label class="firma-card__envio">' +
+                            '<input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + checkEnvio + ' ' + (esElaboradoPor ? 'disabled checked' : '') + '> Enviar como aprobador' +
+                        '</label>' +
                     '</div>' +
                     (sinUsuarios ? sinUsuarios : '') +
-                    (aprobadoresCargo.length ? '<div class="form-group"><select class="form-control" data-grupo="' + cargo.id + '" ' + (esElaboradoPor ? 'disabled' : '') + ' onchange="actualizarSeleccionAprobador(\'' + cargo.id + '\', this.value);">' + opciones + '</select></div>' : '') +
-                    '<div class="checkbox"><label><input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + checkEnvio + ' ' + (esElaboradoPor ? 'disabled checked' : '') + '> Enviar como aprobador</label></div>';
+                    (aprobadoresCargo.length ? '<div class="firma-card__fila-controles">' +
+                        '<div class="form-group" style="margin-bottom:0; min-width: 220px;">' + selectorAprobadores + '</div>' +
+                        '<div class="form-group" style="margin-bottom:0; min-width: 140px;">' + selectorPosicion + '</div>' +
+                    '</div>' : '');
 
                 contenedorTarjetas.appendChild(tarjeta);
             });
@@ -2623,6 +2628,18 @@
             }
         }
 
+        function actualizarInfoBodegaNoRegistrado() {
+            const infoBodega = document.getElementById('infoBodegaNoRegistrado');
+            const selectBodega = document.getElementById('bodega');
+
+            if (infoBodega) {
+                const textoBodega = selectBodega && selectBodega.options && selectBodega.selectedIndex >= 0
+                    ? selectBodega.options[selectBodega.selectedIndex].text
+                    : '';
+                infoBodega.textContent = textoBodega ? 'Bodega seleccionada: ' + textoBodega : 'Seleccione una bodega para el producto';
+            }
+        }
+
         function actualizarVisibilidadSlotsArchivo() {
             const slotArchivoPrincipal = document.getElementById('slotArchivoPrincipal');
             const slotArchivoDetalle = document.getElementById('slotArchivoDetalle');
@@ -2664,6 +2681,11 @@
             const columnaBodega = document.getElementById('columnaBodega');
             const contenedorCamposNoRegistrado = document.getElementById('camposProductoNoRegistrado');
             const codigoAuxiliar = document.getElementById('codigo_auxiliar');
+            const infoBodega = document.getElementById('infoBodegaNoRegistrado');
+            actualizarInfoBodegaNoRegistrado();
+            if (infoBodega) {
+                infoBodega.style.display = activado ? '' : 'none';
+            }
 
             if (activado) {
                 if (producto) {
@@ -2673,8 +2695,8 @@
                 }
                 if (codigoProducto) {
                     codigoProducto.value = '';
-                    codigoProducto.readOnly = true;
-                    codigoProducto.classList.add('solo-lectura');
+                    codigoProducto.readOnly = false;
+                    codigoProducto.classList.remove('solo-lectura');
                 }
                 if (botonBuscar) {
                     botonBuscar.disabled = true;
@@ -2696,13 +2718,13 @@
                     moverElemento(contenedorArchivo, slotArchivoDetalle);
                 }
                 if (columnaBodega) {
-                    columnaBodega.style.display = 'none';
+                    columnaBodega.style.display = '';
                 }
                 if (contenedorCamposNoRegistrado) {
                     contenedorCamposNoRegistrado.style.display = '';
                 }
                 if (codigoAuxiliar) {
-                    codigoAuxiliar.readOnly = true;
+                    codigoAuxiliar.readOnly = false;
                 }
                 generarCodigoAuxiliarAuto();
             } else {
@@ -3065,6 +3087,21 @@
             campo.parentNode.replaceChild(area, campo);
         }
 
+        function manejarTeclasFormulario(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                const target = event.target || {};
+                const tagName = (target.tagName || '').toLowerCase();
+                const permiteEnter = tagName === 'textarea' || target.dataset && target.dataset.allowEnter === 'true';
+
+                if (!permiteEnter) {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         function configurarCamposMultilinea() {
             convertirCampoATextarea('motivo', 4);
             convertirCampoATextarea('observaciones', 4);
@@ -3073,10 +3110,26 @@
 
         function configurarCamposProducto() {
             const codigoProducto = document.getElementById('codigo_producto');
+            const nombreProducto = document.getElementById('producto');
             if (codigoProducto) {
                 codigoProducto.readOnly = true;
                 codigoProducto.classList.add('solo-lectura');
             }
+
+            if (nombreProducto) {
+                nombreProducto.addEventListener('input', function() {
+                    if (!esProductoNoRegistrado() && codigoProducto) {
+                        codigoProducto.value = '';
+                    }
+                });
+            }
+
+            const bodegaSelect = document.getElementById('bodega');
+            if (bodegaSelect) {
+                bodegaSelect.addEventListener('change', actualizarInfoBodegaNoRegistrado);
+            }
+
+            actualizarInfoBodegaNoRegistrado();
         }
 
         function cargar_portafolio(empresa, sucursal) {
@@ -3715,11 +3768,11 @@ function init(tableId) {
 
             .firmas-aprobadores .firma-card {
                 border: 1px solid #d2d6de;
-                padding: 10px;
+                padding: 8px 10px;
                 border-radius: 4px;
                 background: #fff;
-                height: 100%;
                 box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+                min-height: 140px;
             }
 
             .reorden-controles {
@@ -3763,6 +3816,32 @@ function init(tableId) {
                 margin-top: 0;
                 color: #3c8dbc;
                 font-weight: 600;
+            }
+
+            .firma-card__titulo {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 6px;
+            }
+
+            .firma-card__envio {
+                font-size: 12px;
+                color: #555;
+                margin: 0;
+            }
+
+            .firma-card__fila-controles {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .firma-card__fila-controles .form-control {
+                height: 30px;
+                padding: 4px 8px;
             }
 
             .firmas-aprobadores .firma-card small {
@@ -3825,8 +3904,24 @@ function init(tableId) {
             }
 
             .producto-no-registrado-label {
-                color: #16a085;
-                font-weight: 600;
+                color: #8a6d3b;
+                font-weight: 700;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+            }
+
+            .producto-no-registrado-alerta {
+                background: #fff9c4;
+                border: 1px solid #f0e68c;
+                border-radius: 4px;
+                padding: 10px 12px;
+                margin-bottom: 10px;
+            }
+
+            .producto-no-registrado-alerta strong {
+                margin-right: 8px;
+                font-size: 15px;
             }
 
             .btn-accion-superior {
@@ -3867,7 +3962,7 @@ function init(tableId) {
         <div class="row">
             <!-- Main content -->
             <section class="content">
-                <form id="form1" name="form1" class="" role="form" action="javascript:void(null);" onkeypress="if (event.keyCode == 13) { return false; }">
+                <form id="form1" name="form1" class="" role="form" action="javascript:void(null);" onkeypress="return manejarTeclasFormulario(event);">
                     <div class="col-md-12">
                         <div id="divMainInfo" class="direct-chat direct-chat-primary">
                             <div class="box-body">

@@ -7387,15 +7387,12 @@ function buscar_productos($aForm = '')
     $filprod = "";
 
     if (!empty($producto)) {
-        $filprod = "and (prod_nom_prod like upper('%$producto%') OR prod_cod_prod like upper('%$producto%'))";
+        $producto = addslashes($producto);
+        $filprod = "and (prod_nom_prod like upper('%$producto%') OR prod_cod_prod like upper('%$producto%') OR prod_des_prod like upper('%$producto%'))";
     }
 
     $codprod = trim($aForm['codigo_producto']);
     $filcodprod = "";
-
-    if (!empty($codprod)) {
-        $filcodprod = "and (prod_nom_prod like upper('%$codprod%') OR prod_cod_prod like upper('%$codprod%'))";
-    }
 
 
 
@@ -8457,10 +8454,11 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                         <div class="producto-form-panel producto-layout" style="background: #f8f9fb; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 15px;">
                             <div class="row fila-producto">
                                 <div class="col-xs-12">
-                                    <div class="checkbox" style="margin:0;">
-                                        <label class="small producto-no-registrado-label">
-                                            <input type="checkbox" id="producto_no_registrado" name="producto_no_registrado" onchange="toggleProductoNoRegistrado(this.checked);"> Producto no registrado
+                                    <div class="producto-no-registrado-alerta">
+                                        <label class="producto-no-registrado-label">
+                                            <input type="checkbox" id="producto_no_registrado" name="producto_no_registrado" onchange="toggleProductoNoRegistrado(this.checked);" style="margin-right:8px;"> <strong>Producto no registrado</strong> (Ingrese manualmente los datos)
                                         </label>
+                                        <div id="infoBodegaNoRegistrado" class="text-muted" style="margin-top:6px; display:none;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -9028,12 +9026,12 @@ function guarda_pedido($opcion_tmp, $aForm = '', $idReq = 0)
                     $idprdo = (substr($aForm['fecha_pedido'], 5, 2)) * 1;
                     $anio = substr($aForm['fecha_pedido'], 0, 4);
                     $fecha_entrega = fecha_informix_func($aForm['fecha_entrega']);
-                    $solicitado = $aForm['solicitado'];
-                    $motivo = $aForm['motivo'];
+                    $solicitado = strtoupper($aForm['solicitado']);
+                    $motivo = strtoupper($aForm['motivo']);
                     $area = $aForm['area'];
-                    $uso = $aForm['uso'];
-                    $lugar = $aForm['lugar'];
-                    $observacion = $aForm['observaciones'];
+                    $uso = strtoupper($aForm['uso']);
+                    $lugar = strtoupper($aForm['lugar']);
+                    $observacion = strtoupper($aForm['observaciones']);
 
                     //CODIGO REFERENCIA PEDIDO ANULADO
                     //$pedi_cod_anu = $aForm['pedi_cod_anu'];
@@ -9732,11 +9730,11 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
     $codigo_producto = $aForm['codigo_producto'];
     $idbodega        = $aForm['bodega'];
     $costo           = $aForm['costo'];
-    $detalle         = $aForm['detalle'];
+    $detalle         = strtoupper($aForm['detalle']);
     $archivo_real    = $aForm['archivo'];
 
-    $codigo_auxiliar      = isset($aForm['codigo_auxiliar']) ? trim($aForm['codigo_auxiliar']) : '';
-    $descripcion_auxiliar = isset($aForm['descripcion_auxiliar']) ? trim($aForm['descripcion_auxiliar']) : '';
+    $codigo_auxiliar      = isset($aForm['codigo_auxiliar']) ? strtoupper(trim($aForm['codigo_auxiliar'])) : '';
+    $descripcion_auxiliar = isset($aForm['descripcion_auxiliar']) ? strtoupper(trim($aForm['descripcion_auxiliar'])) : '';
 
     // El check viene del formulario (checkbox producto_no_registrado)
     $producto_no_registrado = !empty($aForm['producto_no_registrado']);
@@ -9812,7 +9810,7 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
     if ($oIfx->Query($sql)) {
         if ($oIfx->NumFilas() > 0) {
             $idproducto = $oIfx->f('prod_cod_prod');
-            $prod_nom   = $oIfx->f('prod_nom_prod');
+            $prod_nom   = strtoupper($oIfx->f('prod_nom_prod'));
             $idunidad   = $oIfx->f('prbo_cod_unid');
         } else {
             $idproducto = '';
