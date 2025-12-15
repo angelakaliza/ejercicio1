@@ -2703,7 +2703,7 @@
             const contenedorProducto = document.getElementById('camposProductoEstandar');
             const slotCantidadRegistrado = document.getElementById('slotCantidadRegistrado');
             const slotCantidadNoRegistrado = document.getElementById('slotCantidadNoRegistrado');
-            const contenedorCantidad = document.getElementById('wrapperCantidad');
+            const contenedorCantidad = document.getElementById('contenedorCantidadUnidad');
             const slotArchivoPrincipal = document.getElementById('slotArchivoPrincipal');
             const slotArchivoDetalle = document.getElementById('slotArchivoDetalle');
             const contenedorArchivo = document.getElementById('wrapperArchivo');
@@ -2883,6 +2883,10 @@
             document.getElementById("codigo_producto").value = '';
             document.getElementById("detalle").value = '';
             document.getElementById("archivo").value = '';
+            const unidad = document.getElementById('unidad');
+            if (unidad) {
+                unidad.selectedIndex = 0;
+            }
             const productoNoRegistrado = document.getElementById('producto_no_registrado');
             if (productoNoRegistrado && productoNoRegistrado.checked) {
                 productoNoRegistrado.checked = false;
@@ -2958,8 +2962,8 @@
             xajax_actualiza_grid(id, xajax.getFormValues("form1"));
         }
 
-        function cargar_update_grid(id, producto, cantidad, bode, costo, ccos, detalle) {
-            xajax_agrega_modifica_grid(1, 0, producto, xajax.getFormValues("form1"), id, cantidad, bode, costo, ccos, detalle);
+        function cargar_update_grid(id, producto, cantidad, bode, costo, ccos, detalle, unidad) {
+            xajax_agrega_modifica_grid(1, 0, producto, xajax.getFormValues("form1"), id, cantidad, bode, costo, ccos, detalle, unidad);
         }
 
         function cargar_grid() {
