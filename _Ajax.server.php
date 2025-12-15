@@ -6656,7 +6656,7 @@ function detalle_pedido($secuencial, $empresa, $sucursal)
                 $idbodega   = $oIfx->f('dped_cod_bode');
                 $idproducto = $oIfx->f('dped_cod_prod');
                 $idunidad   = $oIfx->f('dped_cod_unid');
-                $detalle   = $oIfx->f('dped_det_dped');
+                $detalle   = restaurar_saltos_linea_guardados($oIfx->f('dped_det_dped'));
                 $adjuntos   = $oIfx->f('dped_adj_dped');
                 $centro_costo   = $oIfx->f('dped_cod_ccos');
                 $codigoAuxiliarDb = $oIfx->f('dped_cod_auxiliar');
@@ -7965,6 +7965,16 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
 
             $ifu->AgregarCampoListaSQL('bodega', 'Bodega|left', "", false, 170, 150, true);
 
+            $ifu->AgregarCampoListaSQL(
+                'unidad',
+                'Unidad|left',
+                "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
+                true,
+                170,
+                150,
+                true
+            );
+
             $ifu->AgregarCampoOculto('costo', 'Costo');
             $ifu->cCampos['costo']->xValor = 0;
 
@@ -8056,6 +8066,16 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
             $ifu->AgregarCampoNumerico('cantidad', 'Cantidad|LEFT', true, 1, 50, 40, true);
 
             $ifu->AgregarCampoListaSQL('bodega', 'Bodega|left', "", false, 170, 150, true);
+
+            $ifu->AgregarCampoListaSQL(
+                'unidad',
+                'Unidad|left',
+                "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
+                true,
+                170,
+                150,
+                true
+            );
 
             $ifu->AgregarCampoOculto('costo', 'Costo');
             $ifu->cCampos['costo']->xValor = 0;
@@ -8158,10 +8178,19 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
             $ifu->AgregarComandoAlEscribir('cantidad', 'cargar_prod_grid(event);');
 
             $ifu->AgregarCampoListaSQL('bodega', 'Bodega|left', "select  b.bode_cod_bode, b.bode_nom_bode from saebode b, saesubo s where
-                                                                                b.bode_cod_bode = s.subo_cod_bode and
-                                                                                b.bode_cod_empr = $idempresa and
-                                                                                s.subo_cod_empr = $idempresa and
-                                                                                s.subo_cod_sucu = $idsucursal ", false, 170, 150, true);
+                                                                                  b.bode_cod_bode = s.subo_cod_bode and
+                                                                                  b.bode_cod_empr = $idempresa and
+                                                                                  s.subo_cod_empr = $idempresa and
+                                                                                  s.subo_cod_sucu = $idsucursal ", false, 170, 150, true);
+            $ifu->AgregarCampoListaSQL(
+                'unidad',
+                'Unidad|left',
+                "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
+                true,
+                170,
+                150,
+                true
+            );
             $ifu->AgregarCampoNumerico('costo', 'Costo|LEFT', true, 0, 50, 40, true);
 
             $op = '';
@@ -8498,7 +8527,10 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-4 col-md-2" id="slotCantidadRegistrado">
-                                    <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
+                                    <div id="contenedorCantidadUnidad">
+                                        <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
+                                        <div class="form-group" id="wrapperUnidad">' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '</div>
+                                    </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-4 col-md-2" id="slotArchivoPrincipal">
                                     <div class="form-group" id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
@@ -9134,7 +9166,9 @@ function guarda_pedido($opcion_tmp, $aForm = '', $idReq = 0)
 
                         // Si dped_cod_ccos es numérico en la tabla, también conviene normalizarlo:
                         $ccos = isset($aForm[$j . '_ccos']) ? trim($aForm[$j . '_ccos']) : '';
-                        $detalle = trim(str_replace("'", "''", $aForm[$j . '_det']));
+                        $detalleOriginal = isset($aForm[$j . '_det']) ? $aForm[$j . '_det'] : '';
+                        $detalleNormalizado = normalizar_detalle_con_saltos($detalleOriginal);
+                        $detalle = trim(str_replace("'", "''", $detalleNormalizado));
                         $archivo = isset($aValues['Archivo']) ? $aValues['Archivo'] : '';
                         $cod_dreq = $aValues['Codigo Requisicion'] ?? '';
                         $codigo_auxiliar = trim(str_replace("'", "''", $aValues['Codigo Auxiliar'] ?? ''));
@@ -9488,7 +9522,9 @@ function actualiza_pedido($id_pedido, $aForm = '')
 
                         // Si dped_cod_ccos es numérico en la tabla, también conviene normalizarlo:
                         $ccos = isset($aForm[$j . '_ccos']) ? trim($aForm[$j . '_ccos']) : '';
-                        $detalle = trim(str_replace("'", "''", $aForm[$j . '_det']));
+                        $detalleOriginal = isset($aForm[$j . '_det']) ? $aForm[$j . '_det'] : '';
+                        $detalleNormalizado = normalizar_detalle_con_saltos($detalleOriginal);
+                        $detalle = trim(str_replace("'", "''", $detalleNormalizado));
                         $archivo = isset($aValues['Archivo']) ? $aValues['Archivo'] : '';
                         $cod_dreq = $aValues['Codigo Requisicion'] ?? '';
                         $codigo_auxiliar = trim(str_replace("'", "''", $aValues['Codigo Auxiliar'] ?? ''));
@@ -9626,6 +9662,8 @@ function actualiza_pedido($id_pedido, $aForm = '')
                     $oReturn->assign("ctrl", "value", 1);
 
                     $oReturn->script("jsRemoveWindowLoad();");
+                    $oReturn->script("setEstadoPendiente('creada');");
+                    $oReturn->script("xajax_carga_pedido('$secuencial', $idempresa, $sucursal);");
                 } catch (Exception $e) {
                     // rollback
                     $oIfx->QueryT('ROLLBACK WORK;');
@@ -9712,7 +9750,18 @@ function generar_codigo_auxiliar($aForm = '')
     return $oReturn;
 }
 
-function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod = '', $aForm = '', $id = '', $cant_update = 0, $bode_up = 0, $costo_up = 0, $ccos_up = '', $detalle_up = '')
+function normalizar_detalle_con_saltos($detalle)
+{
+    $detalle = (string) $detalle;
+    return str_replace(["\r\n", "\r", "\n"], "\\n", $detalle);
+}
+
+function restaurar_saltos_linea_guardados($detalle)
+{
+    return str_replace('\\n', "\n", (string) $detalle);
+}
+
+function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod = '', $aForm = '', $id = '', $cant_update = 0, $bode_up = 0, $costo_up = 0, $ccos_up = '', $detalle_up = '', $unidad_up = '')
 {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start();
@@ -9747,8 +9796,9 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
     $codigo_producto = $aForm['codigo_producto'];
     $idbodega        = $aForm['bodega'];
     $costo           = $aForm['costo'];
-    $detalle         = strtoupper($aForm['detalle']);
+    $detalle         = normalizar_detalle_con_saltos(strtoupper($aForm['detalle']));
     $archivo_real    = $aForm['archivo'];
+    $unidad_form     = isset($aForm['unidad']) ? $aForm['unidad'] : '';
 
     $codigo_auxiliar      = isset($aForm['codigo_auxiliar']) ? strtoupper(trim($aForm['codigo_auxiliar'])) : '';
     $descripcion_auxiliar = isset($aForm['descripcion_auxiliar']) ? strtoupper(trim($aForm['descripcion_auxiliar'])) : '';
@@ -9810,7 +9860,10 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
         $idbodega = $bode_up;
         $costo = $costo_up;
         $ccos = $ccos_up;
-        $detalle = $detalle_up;
+        $detalle = normalizar_detalle_con_saltos($detalle_up);
+        if ($unidad_up !== '') {
+            $unidad_form = $unidad_up;
+        }
     }
 
     // saeprod
@@ -9847,6 +9900,17 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
             $detalle = $prod_nom;
         }
     }
+
+    if (!empty($unidad_form)) {
+        $idunidad = $unidad_form;
+    }
+
+    if (empty($idunidad)) {
+        $sqlUnidadDefault = "select unid_cod_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid limit 1";
+        $idunidad = consulta_string($sqlUnidadDefault, 'unid_cod_unid', $oIfx, $idunidad);
+    }
+
+    $detalle = normalizar_detalle_con_saltos($detalle);
 
 
 
@@ -9936,7 +10000,8 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
             $fu->AgregarComandoAlEscribir($cont . '_ccos', 'centro_costo_22( \'' . $cont . '_ccos' . '\', event );');
 
             // detalle
-            $fu->AgregarCampoTexto($cont . '_det', 'Detalle', false, $detalle, 100, 100, true);
+            $detalleCampo = restaurar_saltos_linea_guardados($detalle);
+            $fu->AgregarCampoTexto($cont . '_det', 'Detalle', false, $detalleCampo, 100, 100, true);
 
             // busqueda
             $busq = '<img src="' . $_COOKIE['JIREH_IMAGENES'] . 'iconos/viewmag.png"
@@ -9985,7 +10050,8 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
             $fu->AgregarComandoAlEscribir($id . '_ccos', 'centro_costo_22( \'' . $id . '_ccos' . '\', event );');
 
             // detalle
-            $fu->AgregarCampoTexto($id . '_det', 'Detalle', false, $detalle, 100, 100, true);
+            $detalleCampo = restaurar_saltos_linea_guardados($detalle);
+            $fu->AgregarCampoTexto($id . '_det', 'Detalle', false, $detalleCampo, 100, 100, true);
 
 
             // busqueda
@@ -10086,7 +10152,8 @@ function actualiza_grid($id, $aForm)
     $bodega = $aDataGrid[$id]['Bodega'];
     $centro_costo = $aForm[$id . '_ccos'];
     $detalle = $aForm[$id . '_det'];
-    $oReturn->script('cargar_update_grid(\'' . $id . '\', \'' . $producto . '\', \'' . $cantidad . '\' , \'' . $bodega . '\', \'' . $costo . '\', \'' . $centro_costo . '\', \'' . $detalle . '\'  )');
+    $unidadSeleccionada = $aDataGrid[$id]['Unidad'];
+    $oReturn->script('cargar_update_grid(\'' . $id . '\', \'' . $producto . '\', \'' . $cantidad . '\' , \'' . $bodega . '\', \'' . $costo . '\', \'' . $centro_costo . '\', \'' . $detalle . '\', \'' . $unidadSeleccionada . '\'  )');
     return $oReturn;
 }
 
@@ -10262,6 +10329,7 @@ function mostrar_grid($idempresa)
 
         $sql = 'select unid_sigl_unid from saeunid where unid_cod_empr = ' . $idempresa . ' and unid_cod_unid = ? ';
         $data = array($unidadId);
+        $unidad = '';
         if ($oIfx->Query($sql, $data))
             $unidad = $oIfx->f('unid_sigl_unid');
         $oIfx->Free();
@@ -10271,7 +10339,8 @@ function mostrar_grid($idempresa)
         $aDatos[$cont]['Costo Tmp'] = '<div align="right">' . $aValues['Costo Tmp'] . '</div>';
         $aDatos[$cont]['Cantidad'] = '<div align="right">' . $aValues['Cantidad'] . '</div>';
         $detalle = isset($aValues['Detalle']) ? $aValues['Detalle'] : '';
-        $aDatos[$cont]['Detalle'] = nl2br(htmlspecialchars($detalle, ENT_QUOTES, 'UTF-8'));
+        $detalleConSaltos = restaurar_saltos_linea_guardados($detalle);
+        $aDatos[$cont]['Detalle'] = nl2br(htmlspecialchars($detalleConSaltos, ENT_QUOTES, 'UTF-8'));
         $aDatos[$cont]['Archivo'] = $aValues['Archivo'];
         $cont++;
     }
