@@ -9,6 +9,16 @@ function formatear_detalle_multilinea($detalle)
     return str_replace(["\r\n", "\r", "\n"], "\\n", $detalle);
 }
 
+function limpiar_detalle_plano($detalle)
+{
+    $detalle = html_entity_decode((string)$detalle, ENT_QUOTES, 'UTF-8');
+    $detalle = preg_replace('/<br\s*\/?\>/i', "\n", $detalle);
+    $detalle = preg_replace('/<\/(p|div)\s*>/i', "\n", $detalle);
+    $detalle = strip_tags($detalle);
+    $detalle = preg_replace("/\r\n|\r|\n/", "\n", $detalle);
+    return trim($detalle);
+}
+
 function restaurar_detalle_multilinea($detalle)
 {
     return str_replace('\\n', "\n", (string)$detalle);
@@ -7978,7 +7988,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                 'unidad',
                 'Unidad|left',
                 "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
-                true,
+                false,
                 170,
                 150,
                 true
@@ -8080,7 +8090,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                 'unidad',
                 'Unidad|left',
                 "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
-                true,
+                false,
                 170,
                 150,
                 true
@@ -8528,15 +8538,22 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" id="slotCantidadRegistrado">
-                                    <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
-                                </div>
                                 <div class="col-xs-12 col-sm-4 col-md-2" id="slotArchivoPrincipal">
                                     <div class="form-group" id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
                                 </div>
                                 <div class="col-xs-12 col-sm-4 col-md-2" style="display:none;">
                                     ' . $ifu->ObjetoHtml('costo') . '
                                 </div>
+                            </div>
+
+                            <div class="row fila-producto" id="filaCantidadUnidad">
+                                <div class="col-xs-12 col-sm-4 col-md-3" id="slotCantidadRegistrado">
+                                    <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
+                                </div>
+                                <div class="col-xs-12 col-sm-4 col-md-3" id="slotUnidad">
+                                    <div class="form-group" id="wrapperUnidad">' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '</div>
+                                </div>
+                                <div class="col-xs-12 col-sm-4 col-md-3" id="slotArchivoSecundario"></div>
                             </div>
 
                             <div class="row fila-producto" id="filaProductoNoRegistrado" style="display:none;">
@@ -8555,30 +8572,24 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                                 <div class="col-xs-12 col-sm-2 col-md-3" id="slotCantidadNoRegistrado"></div>
                             </div>
 
-<div class="row fila-producto" id="filaDetalleProducto">
-    <!-- Detalle del producto -->
-    <div class="col-xs-12 col-sm-7 col-md-7">
-        <div class="form-group">
-            ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
-        </div>
-    </div>
-
-    <!-- Archivo (cuando aplique) -->
-    <div class="col-xs-12 col-sm-3 col-md-3 slot-archivo-vacio" id="slotArchivoDetalle">
-        <!-- Aquí se inyectará el input de archivo según la lógica JS (no tocar) -->
-    </div>
-
-    <!-- Botón Agregar producto, alineado al último input -->
-    
-            <button class="btn btn-success btn-block btn-agregar-producto"
-                    title="Agregar"
-                    type="button"
-                    value="Agregar Producto"
-                    onClick="javascript:cargar_producto( )">
-                <i class="glyphicon glyphicon-plus"></i> Agregar
-            </button>
-      
-</div>
+                            <div class="row fila-producto" id="filaDetalleProducto">
+                                <div class="col-xs-12 col-sm-7 col-md-7">
+                                    <div class="form-group">
+                                        ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-3 col-md-3 slot-archivo-vacio" id="slotArchivoDetalle">
+                                </div>
+                                <div class="col-xs-12 col-sm-2 col-md-2">
+                                    <button class="btn btn-success btn-block btn-agregar-producto"
+                                            title="Agregar"
+                                            type="button"
+                                            value="Agregar Producto"
+                                            onClick="javascript:cargar_producto( )">
+                                        <i class="glyphicon glyphicon-plus"></i> Agregar
+                                    </button>
+                                </div>
+                            </div>
 
 
                         </div>
@@ -9780,7 +9791,8 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
     $codigo_producto = $aForm['codigo_producto'];
     $idbodega        = $aForm['bodega'];
     $costo           = $aForm['costo'];
-    $detalle         = formatear_detalle_multilinea(strtoupper($aForm['detalle']));
+    $detallePlano    = limpiar_detalle_plano($aForm['detalle']);
+    $detalle         = formatear_detalle_multilinea(strtoupper($detallePlano));
     $unidadSeleccionada = isset($aForm['unidad']) ? $aForm['unidad'] : '';
     $archivo_real    = $aForm['archivo'];
 
@@ -10106,6 +10118,56 @@ function obtener_parametros_producto_no_registrado($empresa, $sucursal)
 }
 
 $xajax->register(XAJAX_FUNCTION, "obtener_parametros_producto_no_registrado");
+
+
+function obtener_unidad_producto($aForm = '')
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    global $DSN_Ifx;
+
+    $codigoProducto = isset($aForm['codigo_producto']) ? trim($aForm['codigo_producto']) : '';
+    $idEmpresa = isset($aForm['empresa']) ? (int)$aForm['empresa'] : 0;
+    $idSucursal = isset($aForm['sucursal']) ? (int)$aForm['sucursal'] : 0;
+    $idBodega = isset($aForm['bodega']) ? (int)$aForm['bodega'] : 0;
+
+    $oReturn = new xajaxResponse();
+
+    if (!$codigoProducto || !$idEmpresa || !$idSucursal || !$idBodega) {
+        return $oReturn;
+    }
+
+    $oIfx = new Dbo;
+    $oIfx->DSN = $DSN_Ifx;
+    $oIfx->Conectar();
+
+    $unidad = '';
+    $sql = "SELECT pr.prbo_cod_unid
+            FROM saeprod p
+            JOIN saeprbo pr ON p.prod_cod_prod = pr.prbo_cod_prod
+                             AND p.prod_cod_empr = pr.prbo_cod_empr
+                             AND p.prod_cod_sucu = pr.prbo_cod_sucu
+            WHERE p.prod_cod_prod = '$codigoProducto'
+              AND pr.prbo_cod_empr = $idEmpresa
+              AND pr.prbo_cod_sucu = $idSucursal
+              AND pr.prbo_cod_bode = $idBodega
+            LIMIT 1";
+
+    if ($oIfx->Query($sql) && $oIfx->NumFilas() > 0) {
+        $unidad = $oIfx->f('prbo_cod_unid');
+    }
+
+    $oIfx->Free();
+
+    if ($unidad !== '') {
+        $unidadJs = addslashes($unidad);
+        $oReturn->script("var unidadSel=document.getElementById('unidad'); if(unidadSel){ unidadSel.value='$unidadJs'; if(unidadSel.value !== '$unidadJs'){ unidadSel.selectedIndex=0; } }");
+    }
+
+    return $oReturn;
+}
 
 
 /// actualiza grid producto

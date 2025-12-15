@@ -86,6 +86,7 @@ $xajax->registerFunction("imprimirPedidoActual");
 $xajax->registerFunction("form_adjuntos_pedi");
 $xajax->registerFunction("agregar_adjuntos_pedi");
 $xajax->registerFunction("eliminar_adjunto_pedi");
+$xajax->registerFunction("obtener_unidad_producto");
 
 /***************************************************/
 ?>
