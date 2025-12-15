@@ -6,7 +6,18 @@ include_once './mov_inv.inc.php';
 function formatear_detalle_multilinea($detalle)
 {
     $detalle = (string)$detalle;
-    return str_replace(["\r\n", "\r", "\n"], "\\n", $detalle);
+
+    // Convertir saltos de línea HTML en saltos de línea de texto
+    $detalle = preg_replace('/<br\s*\/?\>/i', "\n", $detalle);
+
+    // Convertir entidades HTML y eliminar etiquetas para guardar solo texto plano
+    $detalle = html_entity_decode($detalle, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $detalle = strip_tags($detalle);
+
+    // Normalizar saltos de línea
+    $detalle = str_replace(["\r\n", "\r", "\n"], "\n", $detalle);
+
+    return str_replace("\n", "\\n", $detalle);
 }
 
 function restaurar_detalle_multilinea($detalle)
@@ -7512,7 +7523,7 @@ function buscar_productos($aForm = '')
 
 
 
-                $onclik = "datos_prod('$codigo','$nombre',$costo)";
+                $onclik = "datos_prod('$codigo','$nombre',$costo,'$prbo_cod_unid')";
                 $sHtml .= '<tr onclick="' . $onclik . '">
                                 <td align="center">' . $cont . '</td>
                                 <td >' . $codigo . '</td>
@@ -8528,48 +8539,53 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" id="slotCantidadRegistrado">
+                                <div class="col-xs-12 col-sm-6 col-md-2" id="slotUnidadRegistrado">
+                                    <div class="form-group" id="wrapperUnidad">' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '<small class="help-block">Seleccione o ajuste la unidad</small></div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6 col-md-2" id="slotCantidadRegistrado">
                                     <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
                                 </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" id="slotArchivoPrincipal">
-                                    <div class="form-group" id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" style="display:none;">
+                                <div class="col-xs-12" style="display:none;">
                                     ' . $ifu->ObjetoHtml('costo') . '
                                 </div>
                             </div>
 
                             <div class="row fila-producto" id="filaProductoNoRegistrado" style="display:none;">
-                                <div class="col-xs-12 col-sm-5 col-md-4" id="camposProductoNoRegistrado">
+                                <div class="col-xs-12 col-sm-4 col-md-3" id="camposProductoNoRegistrado">
                                     <div class="form-group">
                                         <label for="codigo_auxiliar">Codigo auxiliar</label>
                                         <input type="text" class="form-control" id="codigo_auxiliar" name="codigo_auxiliar" maxlength="50" placeholder="Ingrese codigo auxiliar">
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-5 col-md-5">
+                                <div class="col-xs-12 col-sm-5 col-md-4">
                                     <div class="form-group">
                                         <label for="descripcion_auxiliar">Nombre</label>
                                         <input type="text" class="form-control" id="descripcion_auxiliar" name="descripcion_auxiliar" maxlength="150" placeholder="Describa el producto no registrado">
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-2 col-md-3" id="slotCantidadNoRegistrado"></div>
+                                <div class="col-xs-12 col-sm-3 col-md-3" id="slotUnidadNoRegistrado"></div>
+                                <div class="col-xs-12 col-sm-12 col-md-2" id="slotCantidadNoRegistrado"></div>
                             </div>
 
 <div class="row fila-producto" id="filaDetalleProducto">
-    <!-- Detalle del producto -->
     <div class="col-xs-12 col-sm-7 col-md-7">
         <div class="form-group">
             ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
         </div>
     </div>
 
-    <!-- Archivo (cuando aplique) -->
-    <div class="col-xs-12 col-sm-3 col-md-3 slot-archivo-vacio" id="slotArchivoDetalle">
-        <!-- Aquí se inyectará el input de archivo según la lógica JS (no tocar) -->
+    <div class="col-xs-12 col-sm-3 col-md-3">
+        <div class="slot-archivo-vacio" id="slotArchivoPrincipal">
+            <div class="form-group" id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
+        </div>
+        <div class="slot-archivo-vacio" id="slotArchivoDetalle" style="margin-top: 10px;">
+            <!-- Aquí se inyectará el input de archivo según la lógica JS (no tocar) -->
+        </div>
     </div>
 
-    <!-- Botón Agregar producto, alineado al último input -->
-    
+    <div class="col-xs-12 col-sm-2 col-md-2">
+        <div class="form-group detalle-acciones">
+            <label class="hidden-xs">&nbsp;</label>
             <button class="btn btn-success btn-block btn-agregar-producto"
                     title="Agregar"
                     type="button"
@@ -8577,7 +8593,9 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                     onClick="javascript:cargar_producto( )">
                 <i class="glyphicon glyphicon-plus"></i> Agregar
             </button>
-      
+        </div>
+    </div>
+
 </div>
 
 
