@@ -7843,14 +7843,32 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
     $codigo_area = consulta_string($sql, 'usuario_departamento', $oIfx, '');
 
 
-    //CONSULTA CODIGO DE AREA USUARIO
+    ///AREAS 
 
-    $sql_area = "SELECT area_cod_area, area_des_area from saearea where area_cod_area='$codigo_area'";
+    $optionArea = '';
+
+    $sql_area = "SELECT area_cod_area, area_des_area from saearea where area_cod_empr=$idempresa";
+
+    if ($oIfx->Query($sql_area)) {
+        if ($oIfx->NumFilas() > 0) {
+            do {
+
+                if($codigo_area == $oIfx->f('area_cod_area')){
+                    $optionArea .= '<option selected value="' . $oIfx->f('area_cod_area') . '">' . $oIfx->f('area_des_area') . '</option>';
+                }
+                else{
+                    $optionArea .= '<option value="' . $oIfx->f('area_cod_area') . '">' . $oIfx->f('area_des_area') . '</option>';
+                }
+
+            } while ($oIfx->SiguienteRegistro());
+        }
+    }
+    $oIfx->Free();
 
     //VALIDACION ACCION SOLICITUD DE DE COMPRA
 
 
-    $sql_apro = "SELECT id from comercial.aprobaciones_compras where tipo_aprobacion='SOLCOMPRAS'";
+    /*$sql_apro = "SELECT id from comercial.aprobaciones_compras where tipo_aprobacion='SOLCOMPRAS'";
     $id_apro = consulta_string($sql_apro, 'id', $oIfx, '');
 
     if (!empty($id_apro)) {
@@ -7869,21 +7887,11 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
         if ($ctrl_apro != 0) {
             $sql_area = "SELECT area_cod_area, area_des_area from saearea where area_cod_empr= $idempresa";
         }
-    }
+    }*/
 
 
 
-    //Area
-    $optionArea = '';
-
-    if ($oIfx->Query($sql_area)) {
-        if ($oIfx->NumFilas() > 0) {
-            do {
-                $optionArea .= '<option value="' . $oIfx->f('area_cod_area') . '">' . $oIfx->f('area_des_area') . '</option>';
-            } while ($oIfx->SiguienteRegistro());
-        }
-    }
-    $oIfx->Free();
+    
 
 
 
@@ -9071,31 +9079,37 @@ function guarda_pedido($opcion_tmp, $aForm = '', $idReq = 0)
                     $formato = consulta_string_func($sql_formato, 'ftrn_cod_ftrn', $oIfx, 0);
 
                     // spreimpreso
-                    $secuencial = pedf_num_preimp($idempresa, $sucursal);
+                    //$secuencial = pedf_num_preimp($idempresa, $sucursal);
 
                     $pedi_est_pedi = '0';
                     if ($tipo_logistica == 'M') {
                         //	$pedi_est_pedi = 2;
                     }
 
+                    $sql_maxminv = "select max(pedi_cod_pedi) as maximo from saepedi";
+                    $ultimo_id = consulta_string($sql_maxminv, 'maximo', $oIfx, 0)+1;
+
                     // cabecera SAEPEDi informix
-                    $sql_cab = "insert into saepedi( pedi_cod_pedi,      pedi_cod_sucu,     pedi_cod_empr,
+                    $sql_cab = "insert into saepedi( pedi_cod_pedi, pedi_cod_sucu,     pedi_cod_empr,
                                                                pedi_cod_empl,     pedi_cod_clpv,     pedi_cod_ftrn,
                                                                pedi_cod_usua,     pedi_num_prdo,     pedi_cod_ejer,
                                                                pedi_ban_pedi,     pedi_res_pedi,     pedi_det_pedi,
                                                                pedi_fec_pedi,     pedi_fec_entr,     pedi_est_pedi,
                                                                pedi_are_soli,     pedi_lug_entr,     pedi_uso_pedi,
                                                                pedi_des_cons,     pedi_user_web,     pedi_fech_server,
-                                                                                                                           pedi_tipo_pedi,    pedi_tip_sol,    pedi_cod_anu,     pedi_omit_aprob      )
-                                                        values( '$secuencial' ,   $sucursal,         $idempresa,
+                                                               pedi_tipo_pedi,    pedi_tip_sol,    pedi_cod_anu,     
+                                                               pedi_omit_aprob      )
+                                                        values( $ultimo_id, $sucursal,         $idempresa,
                                                                '$empleado',       '$prov' ,           '$formato',
                                                                 $usuario_ifx,     $idprdo,           $idejer,
                                                                 0,                '$solicitado',     '$motivo',
                                                                '$fecha_pedido',   '$fecha_entrega',  '$pedi_est_pedi',
                                                                '$area' ,          '$lugar',          '$uso',
                                                                '$observacion',     $usuario_web,     '$fecha_servidor',
-                                                                                                                           '$tipo_logistica',  '$tipo_solicitud',  $pedi_cod_anu, '$valorOmitirAprobaciones'       )";
+                                                            '$tipo_logistica',  '$tipo_solicitud',  $pedi_cod_anu, '$valorOmitirAprobaciones') RETURNING pedi_cod_pedi;";
                     $oIfx->QueryT($sql_cab);
+                    $secuencial = $oIfx->ResRow['pedi_cod_pedi'];
+
 
                     // ingreso a la saedped
                     $x = 1;

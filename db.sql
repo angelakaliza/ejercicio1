@@ -97,3 +97,13 @@ VALUES (1, 103, '22RCMAROTOD00001', 1, 1, 1, 10, 25, '1.01.006', 1, '1.00', '0.0
 -------- tabla de aprobadores (comercial.aprobador)--------
 INSERT INTO "comercial"."aprobador" ("id", "empresa", "sucursal", "cargo_id", "nombre", "correo", "telefono", "estado", "creado_en") 
 VALUES (1, 1, 1, 1, 'Juan Perez', 'juan@perez', '1234567890', 'A', '2024-10-24 21:54:42');  
+
+
+
+
+---------------------------------
+
+---------Tabla de unidades---------
+INSERT INTO public.saeunid
+(unid_cod_unid, unid_cod_empr, unid_nom_unid, unid_sigl_unid, unid_can_unid, unid_ueq_unid, unid_tip_unid)
+VALUES(1, 1, 'UNIDAD', 'UN', NULL, NULL, NULL);
