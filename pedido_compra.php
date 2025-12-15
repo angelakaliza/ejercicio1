@@ -2955,6 +2955,17 @@
             }
         }
 
+        function preseleccionarUnidadProducto() {
+            const codigo = document.getElementById('codigo_producto');
+            const bodega = document.getElementById('bodega');
+            const empresa = document.getElementById('empresa');
+            const sucursal = document.getElementById('sucursal');
+
+            if (codigo && codigo.value.trim() && bodega && bodega.value && empresa && empresa.value && sucursal && sucursal.value) {
+                xajax_obtener_unidad_producto(xajax.getFormValues("form1"));
+            }
+        }
+
 
         function cargar_update_cant(id) {
             var a = document.getElementById(id + "_cantidad").value;
@@ -3146,6 +3157,8 @@
             if (codigoProducto) {
                 codigoProducto.readOnly = true;
                 codigoProducto.classList.add('solo-lectura');
+                codigoProducto.addEventListener('change', preseleccionarUnidadProducto);
+                codigoProducto.addEventListener('blur', preseleccionarUnidadProducto);
             }
 
             if (nombreProducto) {
@@ -3159,6 +3172,7 @@
             const bodegaSelect = document.getElementById('bodega');
             if (bodegaSelect) {
                 bodegaSelect.addEventListener('change', actualizarInfoBodegaNoRegistrado);
+                bodegaSelect.addEventListener('change', preseleccionarUnidadProducto);
             }
 
             actualizarInfoBodegaNoRegistrado();
@@ -3318,6 +3332,7 @@ function init(tableId) {
             document.getElementById('codigo_producto').value = a;
             document.getElementById('producto').value = b;
             document.getElementById('costo').value = c;
+            preseleccionarUnidadProducto();
             cerrarModal();
         }
 
@@ -4244,6 +4259,7 @@ function init(tableId) {
             inicializarAccesosRapidosProducto();
             configurarCamposMultilinea();
             configurarCamposProducto();
+            preseleccionarUnidadProducto();
         });
         genera_formulario(); /*genera_detalle();genera_form_detalle();*/
     </script>
