@@ -2882,6 +2882,9 @@
             document.getElementById("costo").value = 0;
             document.getElementById("codigo_producto").value = '';
             document.getElementById("detalle").value = '';
+            if (document.getElementById("unidad")) {
+                document.getElementById("unidad").selectedIndex = 0;
+            }
             document.getElementById("archivo").value = '';
             const productoNoRegistrado = document.getElementById('producto_no_registrado');
             if (productoNoRegistrado && productoNoRegistrado.checked) {

@@ -1,7 +1,18 @@
 <?php
 
-require("_Ajax.comun.php"); // No modificar esta linea	
+require("_Ajax.comun.php"); // No modificar esta linea
 include_once './mov_inv.inc.php';
+
+function formatear_detalle_multilinea($detalle)
+{
+    $detalle = (string)$detalle;
+    return str_replace(["\r\n", "\r", "\n"], "\\n", $detalle);
+}
+
+function restaurar_detalle_multilinea($detalle)
+{
+    return str_replace('\\n', "\n", (string)$detalle);
+}
 /* :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   // S E R V I D O R   A J A X //
   :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
@@ -3562,7 +3573,7 @@ function form_proveedores($codpedi, $codapro,  $idempresa, $idsucursal, $tipo)
                 $table_op .= '<td align="left">' . $bode_nom . '</td>';
                 $table_op .= '<td align="left">' . $prod_cod . '</td>';
                 $table_op .= '<td align="left">' . $prod_nom . '</td>';
-                $table_op .= '<td align="left">' . $dped_det_dped . '</td>';
+                $table_op .= '<td align="left">' . nl2br(htmlspecialchars(restaurar_detalle_multilinea($dped_det_dped), ENT_QUOTES, 'UTF-8')) . '</td>';
                 $table_op .= '<td align="left">' . $unid_nom . '</td>';
                 $table_op .= '<td align="right">' . $pedido . '</td>';
                 $table_op .= '<td align="right">' . $prbo_dis . '</td>';
@@ -3753,7 +3764,7 @@ function form_proforma_proveedores($codpedi, $codapro, $idempresa, $idsucursal)
                     $table_op .= '<td align="left">' . $bode_nom . '</td>';
                     $table_op .= '<td align="left">' . $prod_cod . '</td>';
                     $table_op .= '<td align="left">' . $prod_nom . '</td>';
-                    $table_op .= '<td align="left">' . $dped_det_dped . '</td>';
+                    $table_op .= '<td align="left">' . nl2br(htmlspecialchars(restaurar_detalle_multilinea($dped_det_dped), ENT_QUOTES, 'UTF-8')) . '</td>';
                     $table_op .= '<td align="left">' . $unid_nom . '</td>';
                     $table_op .= '<td align="right">' . $pedido . '</td>';
                     $table_op .= '<td align="right">' . $prbo_dis . '</td>';
@@ -6020,7 +6031,7 @@ function adjuntos_solicitud($id, $empresa, $sucursal, $tipo)
             do {
                 $prod_cod = $oIfx->f('dped_cod_prod');
                 $prod = $oIfx->f('dped_prod_nom');
-                $detalle = nl2br(htmlspecialchars($oIfx->f('dped_det_dped'), ENT_QUOTES, 'UTF-8'));
+                $detalle = nl2br(htmlspecialchars(restaurar_detalle_multilinea($oIfx->f('dped_det_dped')), ENT_QUOTES, 'UTF-8'));
                 $adjuntos = $oIfx->f('dped_adj_dped');
 
 
@@ -7963,6 +7974,16 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
 
             $ifu->AgregarCampoNumerico('cantidad', 'Cantidad|LEFT', true, 1, 50, 40, true);
 
+            $ifu->AgregarCampoListaSQL(
+                'unidad',
+                'Unidad|left',
+                "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
+                true,
+                170,
+                150,
+                true
+            );
+
             $ifu->AgregarCampoListaSQL('bodega', 'Bodega|left', "", false, 170, 150, true);
 
             $ifu->AgregarCampoOculto('costo', 'Costo');
@@ -8054,6 +8075,16 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
             $ifu->AgregarComandoAlEscribir('codigo_producto', 'autocompletar_producto(' . $idempresa . ', event, 2)');
 
             $ifu->AgregarCampoNumerico('cantidad', 'Cantidad|LEFT', true, 1, 50, 40, true);
+
+            $ifu->AgregarCampoListaSQL(
+                'unidad',
+                'Unidad|left',
+                "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
+                true,
+                170,
+                150,
+                true
+            );
 
             $ifu->AgregarCampoListaSQL('bodega', 'Bodega|left', "", false, 170, 150, true);
 
@@ -9134,7 +9165,8 @@ function guarda_pedido($opcion_tmp, $aForm = '', $idReq = 0)
 
                         // Si dped_cod_ccos es numérico en la tabla, también conviene normalizarlo:
                         $ccos = isset($aForm[$j . '_ccos']) ? trim($aForm[$j . '_ccos']) : '';
-                        $detalle = trim(str_replace("'", "''", $aForm[$j . '_det']));
+                        $detalleCrudo = isset($aForm[$j . '_det']) ? $aForm[$j . '_det'] : '';
+                        $detalle = trim(str_replace("'", "''", formatear_detalle_multilinea($detalleCrudo)));
                         $archivo = isset($aValues['Archivo']) ? $aValues['Archivo'] : '';
                         $cod_dreq = $aValues['Codigo Requisicion'] ?? '';
                         $codigo_auxiliar = trim(str_replace("'", "''", $aValues['Codigo Auxiliar'] ?? ''));
@@ -9488,7 +9520,8 @@ function actualiza_pedido($id_pedido, $aForm = '')
 
                         // Si dped_cod_ccos es numérico en la tabla, también conviene normalizarlo:
                         $ccos = isset($aForm[$j . '_ccos']) ? trim($aForm[$j . '_ccos']) : '';
-                        $detalle = trim(str_replace("'", "''", $aForm[$j . '_det']));
+                        $detalleCrudo = isset($aForm[$j . '_det']) ? $aForm[$j . '_det'] : '';
+                        $detalle = trim(str_replace("'", "''", formatear_detalle_multilinea($detalleCrudo)));
                         $archivo = isset($aValues['Archivo']) ? $aValues['Archivo'] : '';
                         $cod_dreq = $aValues['Codigo Requisicion'] ?? '';
                         $codigo_auxiliar = trim(str_replace("'", "''", $aValues['Codigo Auxiliar'] ?? ''));
@@ -9747,7 +9780,8 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
     $codigo_producto = $aForm['codigo_producto'];
     $idbodega        = $aForm['bodega'];
     $costo           = $aForm['costo'];
-    $detalle         = strtoupper($aForm['detalle']);
+    $detalle         = formatear_detalle_multilinea(strtoupper($aForm['detalle']));
+    $unidadSeleccionada = isset($aForm['unidad']) ? $aForm['unidad'] : '';
     $archivo_real    = $aForm['archivo'];
 
     $codigo_auxiliar      = isset($aForm['codigo_auxiliar']) ? strtoupper(trim($aForm['codigo_auxiliar'])) : '';
@@ -9836,6 +9870,10 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
         }
     }
     $oIfx->Free();
+
+    if ($unidadSeleccionada !== '') {
+        $idunidad = $unidadSeleccionada;
+    }
 
     if ($producto_no_registrado) {
         $idproducto = $codigo_producto;
@@ -10271,7 +10309,8 @@ function mostrar_grid($idempresa)
         $aDatos[$cont]['Costo Tmp'] = '<div align="right">' . $aValues['Costo Tmp'] . '</div>';
         $aDatos[$cont]['Cantidad'] = '<div align="right">' . $aValues['Cantidad'] . '</div>';
         $detalle = isset($aValues['Detalle']) ? $aValues['Detalle'] : '';
-        $aDatos[$cont]['Detalle'] = nl2br(htmlspecialchars($detalle, ENT_QUOTES, 'UTF-8'));
+        $detalleFormateado = restaurar_detalle_multilinea($detalle);
+        $aDatos[$cont]['Detalle'] = nl2br(htmlspecialchars($detalleFormateado, ENT_QUOTES, 'UTF-8'));
         $aDatos[$cont]['Archivo'] = $aValues['Archivo'];
         $cont++;
     }
