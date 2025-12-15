@@ -2675,10 +2675,12 @@
 
             if (slotArchivoPrincipal) {
                 slotArchivoPrincipal.classList.toggle('slot-archivo-vacio', !slotArchivoPrincipal.children.length);
+                slotArchivoPrincipal.style.display = slotArchivoPrincipal.children.length ? '' : 'none';
             }
 
             if (slotArchivoDetalle) {
                 slotArchivoDetalle.classList.toggle('slot-archivo-vacio', !slotArchivoDetalle.children.length);
+                slotArchivoDetalle.style.display = slotArchivoDetalle.children.length ? '' : 'none';
             }
         }
 
@@ -2704,6 +2706,9 @@
             const slotCantidadRegistrado = document.getElementById('slotCantidadRegistrado');
             const slotCantidadNoRegistrado = document.getElementById('slotCantidadNoRegistrado');
             const contenedorCantidad = document.getElementById('wrapperCantidad');
+            const slotUnidadRegistrado = document.getElementById('slotUnidadRegistrado');
+            const slotUnidadNoRegistrado = document.getElementById('slotUnidadNoRegistrado');
+            const contenedorUnidad = document.getElementById('wrapperUnidad');
             const slotArchivoPrincipal = document.getElementById('slotArchivoPrincipal');
             const slotArchivoDetalle = document.getElementById('slotArchivoDetalle');
             const contenedorArchivo = document.getElementById('wrapperArchivo');
@@ -2742,6 +2747,9 @@
                 }
                 if (slotCantidadNoRegistrado) {
                     moverElemento(contenedorCantidad, slotCantidadNoRegistrado);
+                }
+                if (slotUnidadNoRegistrado) {
+                    moverElemento(contenedorUnidad, slotUnidadNoRegistrado);
                 }
                 if (slotArchivoDetalle) {
                     moverElemento(contenedorArchivo, slotArchivoDetalle);
@@ -2782,6 +2790,9 @@
                 }
                 if (slotCantidadRegistrado) {
                     moverElemento(contenedorCantidad, slotCantidadRegistrado);
+                }
+                if (slotUnidadRegistrado) {
+                    moverElemento(contenedorUnidad, slotUnidadRegistrado);
                 }
                 if (slotArchivoPrincipal) {
                     moverElemento(contenedorArchivo, slotArchivoPrincipal);
@@ -3162,6 +3173,7 @@
             }
 
             actualizarInfoBodegaNoRegistrado();
+            actualizarVisibilidadSlotsArchivo();
         }
 
         function cargar_portafolio(empresa, sucursal) {
@@ -3314,10 +3326,14 @@ function init(tableId) {
 }
 
 
-        function datos_prod(a, b, c) {
+        function datos_prod(a, b, c, u) {
             document.getElementById('codigo_producto').value = a;
             document.getElementById('producto').value = b;
             document.getElementById('costo').value = c;
+            const unidad = document.getElementById('unidad');
+            if (unidad && typeof u !== 'undefined' && u !== null && u !== '') {
+                unidad.value = u;
+            }
             cerrarModal();
         }
 
