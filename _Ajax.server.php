@@ -6020,7 +6020,7 @@ function adjuntos_solicitud($id, $empresa, $sucursal, $tipo)
             do {
                 $prod_cod = $oIfx->f('dped_cod_prod');
                 $prod = $oIfx->f('dped_prod_nom');
-                $detalle = $oIfx->f('dped_det_dped');
+                $detalle = nl2br(htmlspecialchars($oIfx->f('dped_det_dped'), ENT_QUOTES, 'UTF-8'));
                 $adjuntos = $oIfx->f('dped_adj_dped');
 
 
@@ -7843,14 +7843,32 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
     $codigo_area = consulta_string($sql, 'usuario_departamento', $oIfx, '');
 
 
-    //CONSULTA CODIGO DE AREA USUARIO
+    ///AREAS 
 
-    $sql_area = "SELECT area_cod_area, area_des_area from saearea where area_cod_area='$codigo_area'";
+    $optionArea = '';
+
+    $sql_area = "SELECT area_cod_area, area_des_area from saearea where area_cod_empr=$idempresa";
+
+    if ($oIfx->Query($sql_area)) {
+        if ($oIfx->NumFilas() > 0) {
+            do {
+
+                if($codigo_area == $oIfx->f('area_cod_area')){
+                    $optionArea .= '<option selected value="' . $oIfx->f('area_cod_area') . '">' . $oIfx->f('area_des_area') . '</option>';
+                }
+                else{
+                    $optionArea .= '<option value="' . $oIfx->f('area_cod_area') . '">' . $oIfx->f('area_des_area') . '</option>';
+                }
+
+            } while ($oIfx->SiguienteRegistro());
+        }
+    }
+    $oIfx->Free();
 
     //VALIDACION ACCION SOLICITUD DE DE COMPRA
 
 
-    $sql_apro = "SELECT id from comercial.aprobaciones_compras where tipo_aprobacion='SOLCOMPRAS'";
+    /*$sql_apro = "SELECT id from comercial.aprobaciones_compras where tipo_aprobacion='SOLCOMPRAS'";
     $id_apro = consulta_string($sql_apro, 'id', $oIfx, '');
 
     if (!empty($id_apro)) {
@@ -7869,21 +7887,11 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
         if ($ctrl_apro != 0) {
             $sql_area = "SELECT area_cod_area, area_des_area from saearea where area_cod_empr= $idempresa";
         }
-    }
+    }*/
 
 
 
-    //Area
-    $optionArea = '';
-
-    if ($oIfx->Query($sql_area)) {
-        if ($oIfx->NumFilas() > 0) {
-            do {
-                $optionArea .= '<option value="' . $oIfx->f('area_cod_area') . '">' . $oIfx->f('area_des_area') . '</option>';
-            } while ($oIfx->SiguienteRegistro());
-        }
-    }
-    $oIfx->Free();
+    
 
 
 
@@ -8268,7 +8276,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                     <button type="button" class="btn btn-info btn-sm btn-accion-superior" id="btnUltimoPedido" title="Ãšltimo pedido" onclick="navegarPedido(\'ultimo\');">
                         <i class="fa fa-angle-double-right"></i>
                     </button>
-                    <button type="button" class="btn btn-primary btn-sm btn-accion-superior" onclick="javascript:editar_pedido();" >
+                    <button type="button" class="btn btn-primary btn-sm btn-accion-superior" id="btnEditarPedido" onclick="javascript:editar_pedido();" >
                         <span class="glyphicon glyphicon-pencil"></span>
                         Editar
                     </button>
@@ -8289,7 +8297,11 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                     </button>
                     <div class="input-group input-group-sm" style="max-width:200px; display:inline-flex; margin-left:8px;">
                         <input type="text" class="form-control" id="busquedaPedido" placeholder="Nro. pedido" onkeydown="buscarPedidoPorNumero(event);">
-
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" onclick="abrirModalPedidos();" title="Buscar pedido">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
                     </div>
                 </div>';
     $sHtml .= '</div>';
@@ -8416,14 +8428,14 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
     $sHtml .= '<div class="section-card section-card--nested">
                     <div class="section-card__header section-card__header--with-actions">
                         <h4 class="section-card__title"><i class="fa fa-check-square-o"></i> Aprobaciones</h4>
-                        <div class="section-card__actions">
-                            <label class="checkbox-inline" style="margin-right:10px;">
-<input type="checkbox" id="omitirAprobaciones" onchange="toggleOmitirAprobaciones(this.checked);"> No enviar aprobadores
+                        <div class="section-card__actions" id="accionesAprobaciones">
+                            <label class="checkbox-inline" style="margin-right:10px;" id="opcionAprobaciones">
+                                <input type="checkbox" id="omitirAprobaciones" onchange="toggleOmitirAprobaciones(this.checked);"> No enviar aprobadores
                             </label>
                             <button type="button" class="btn btn-default btn-sm" onclick="toggleSeccionAprobaciones();" title="Mostrar u ocultar aprobaciones">
                                 <i id="iconoToggleAprobaciones" class="fa fa-chevron-up"></i>
                             </button>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalAprobaciones();">
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAbrirGestionAprobaciones" onclick="abrirModalAprobaciones();">
                                 <i class="fa fa-user-plus"></i> Agregar aprobacion
                             </button>
                         </div>
@@ -9067,31 +9079,37 @@ function guarda_pedido($opcion_tmp, $aForm = '', $idReq = 0)
                     $formato = consulta_string_func($sql_formato, 'ftrn_cod_ftrn', $oIfx, 0);
 
                     // spreimpreso
-                    $secuencial = pedf_num_preimp($idempresa, $sucursal);
+                    //$secuencial = pedf_num_preimp($idempresa, $sucursal);
 
                     $pedi_est_pedi = '0';
                     if ($tipo_logistica == 'M') {
                         //	$pedi_est_pedi = 2;
                     }
 
+                    $sql_maxminv = "select max(pedi_cod_pedi) as maximo from saepedi";
+                    $ultimo_id = consulta_string($sql_maxminv, 'maximo', $oIfx, 0)+1;
+
                     // cabecera SAEPEDi informix
-                    $sql_cab = "insert into saepedi( pedi_cod_pedi,      pedi_cod_sucu,     pedi_cod_empr,
+                    $sql_cab = "insert into saepedi( pedi_cod_pedi, pedi_cod_sucu,     pedi_cod_empr,
                                                                pedi_cod_empl,     pedi_cod_clpv,     pedi_cod_ftrn,
                                                                pedi_cod_usua,     pedi_num_prdo,     pedi_cod_ejer,
                                                                pedi_ban_pedi,     pedi_res_pedi,     pedi_det_pedi,
                                                                pedi_fec_pedi,     pedi_fec_entr,     pedi_est_pedi,
                                                                pedi_are_soli,     pedi_lug_entr,     pedi_uso_pedi,
                                                                pedi_des_cons,     pedi_user_web,     pedi_fech_server,
-                                                                                                                           pedi_tipo_pedi,    pedi_tip_sol,    pedi_cod_anu,     pedi_omit_aprob      )
-                                                        values( '$secuencial' ,   $sucursal,         $idempresa,
+                                                               pedi_tipo_pedi,    pedi_tip_sol,    pedi_cod_anu,     
+                                                               pedi_omit_aprob      )
+                                                        values( $ultimo_id, $sucursal,         $idempresa,
                                                                '$empleado',       '$prov' ,           '$formato',
                                                                 $usuario_ifx,     $idprdo,           $idejer,
                                                                 0,                '$solicitado',     '$motivo',
                                                                '$fecha_pedido',   '$fecha_entrega',  '$pedi_est_pedi',
                                                                '$area' ,          '$lugar',          '$uso',
                                                                '$observacion',     $usuario_web,     '$fecha_servidor',
-                                                                                                                           '$tipo_logistica',  '$tipo_solicitud',  $pedi_cod_anu, '$valorOmitirAprobaciones'       )";
+                                                            '$tipo_logistica',  '$tipo_solicitud',  $pedi_cod_anu, '$valorOmitirAprobaciones') RETURNING pedi_cod_pedi;";
                     $oIfx->QueryT($sql_cab);
+                    $secuencial = $oIfx->ResRow['pedi_cod_pedi'];
+
 
                     // ingreso a la saedped
                     $x = 1;
@@ -10213,17 +10231,19 @@ function mostrar_grid($idempresa)
 
         $aDatos[$cont]['Eliminar'] = '<div align="center">' . $aValues['Eliminar'] . '</div>';
 
-        //bodega
-        $sql = 'select bode_nom_bode from saebode where bode_cod_bode = ? and bode_cod_empr = ?';
-        $data = array($bodegaId, $idempresa);
-        if ($oIfx->Query($sql, $data))
-            $bodega = $oIfx->f('bode_nom_bode');
-        $oIfx->Free();
-        $aDatos[$cont]['Bodega'] = $bodega;
-
         $esAuxiliar = ($aValues['Producto Auxiliar'] ?? 'No') === 'SI';
         $codigoAuxiliar = trim($aValues['Codigo Auxiliar'] ?? '');
         $descripcionAuxiliar = trim($aValues['Descripcion Auxiliar'] ?? '');
+
+        $aDatos[$cont]['Bodega'] = '';
+        if (!$esAuxiliar) {
+            $sql = 'select bode_nom_bode from saebode where bode_cod_bode = ? and bode_cod_empr = ?';
+            $data = array($bodegaId, $idempresa);
+            if ($oIfx->Query($sql, $data)) {
+                $aDatos[$cont]['Bodega'] = $oIfx->f('bode_nom_bode');
+            }
+            $oIfx->Free();
+        }
 
         $aDatos[$cont]['Producto auxiliar (SI/No)'] = $esAuxiliar ? 'SI' : 'No';
         $aDatos[$cont]['Codigo Item'] = ($esAuxiliar && $codigoAuxiliar) ? $codigoAuxiliar : $cod_prod;
@@ -10250,7 +10270,8 @@ function mostrar_grid($idempresa)
         $aDatos[$cont]['Cantidad Tmp'] = '<div align="right">' . $aValues['Cantidad Tmp'] . '</div>';
         $aDatos[$cont]['Costo Tmp'] = '<div align="right">' . $aValues['Costo Tmp'] . '</div>';
         $aDatos[$cont]['Cantidad'] = '<div align="right">' . $aValues['Cantidad'] . '</div>';
-        $aDatos[$cont]['Detalle'] = $aValues['Detalle'];
+        $detalle = isset($aValues['Detalle']) ? $aValues['Detalle'] : '';
+        $aDatos[$cont]['Detalle'] = nl2br(htmlspecialchars($detalle, ENT_QUOTES, 'UTF-8'));
         $aDatos[$cont]['Archivo'] = $aValues['Archivo'];
         $cont++;
     }

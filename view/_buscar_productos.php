@@ -136,6 +136,14 @@ $sql = "select *from sp_obtener_todos_productos($idempresa , $sucursal,$bodega,5
                 Listado Productos
             </div>
             <div class="panel-body">
+                <div class="row" style="margin-bottom: 10px;">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="text" id="buscadorProductosModal" class="form-control" placeholder="Buscar en productos">
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table id="table_productos" class="table table-condensed table-striped table-hover">
                         <thead>
@@ -297,6 +305,14 @@ $sql = "select *from sp_obtener_todos_productos($idempresa , $sucursal,$bodega,5
             "ordering": true,
             "info": true,
         });
+
+        var buscadorModal = document.getElementById('buscadorProductosModal');
+        if (buscadorModal) {
+            buscadorModal.value = search;
+            buscadorModal.addEventListener('input', function() {
+                table.search(this.value).draw();
+            });
+        }
 
         table.search(search).draw();
     }
