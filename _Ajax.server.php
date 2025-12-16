@@ -8603,10 +8603,10 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                                 <h4 class="section-card__title"><i class="fa fa-list-alt"></i> Productos agregados</h4>
                             </div>
                             <div class="section-card__body section-card__body--spaced">
-                                <div id="divFormularioDetalle"></div>
+                                <div id="divFormularioDetalle" class="tabla-productos-wrapper"></div>
                                 <div id="divTotal"></div>
-                                <div id="divFormularioTotal" class="table-responsive"></div>
-                                <div id="divFormularioDetalle2" class="table-responsive" style="margin-bottom: 120px;"></div>
+                                <div id="divFormularioTotal" class="table-responsive tabla-productos-wrapper"></div>
+                                <div id="divFormularioDetalle2" class="table-responsive tabla-productos-wrapper" style="margin-bottom: 120px;"></div>
                             </div>
                         </div>
                         <div class="text-right acciones-guardado-productos" style="margin: 20px 5px;">
