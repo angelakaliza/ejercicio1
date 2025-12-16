@@ -3350,6 +3350,119 @@ function init(tableId) {
         ordering: true,
         info: true
     });
+
+    return table;
+}
+
+function initTabla(tableId) {
+    var table = init(tableId);
+
+    if (tableId === 'listprod') {
+        configurarBuscadorProductosModal(table);
+        prepararSeleccionFilasProductos();
+    }
+
+    return table;
+}
+
+function configurarBuscadorProductosModal(tableInstance) {
+    var buscador = document.getElementById('buscadorProductosModal');
+    if (!buscador || !tableInstance) {
+        return;
+    }
+
+    if (buscador.dataset.listenerAttached === 'true') {
+        return;
+    }
+
+    buscador.addEventListener('input', function() {
+        tableInstance.search(this.value).draw();
+    });
+    buscador.dataset.listenerAttached = 'true';
+}
+
+function prepararSeleccionFilasProductos() {
+    var cuerpoTabla = document.querySelector('#listprod tbody');
+    if (!cuerpoTabla || cuerpoTabla.dataset.listenerAttached === 'true') {
+        return;
+    }
+
+    cuerpoTabla.addEventListener('click', function(event) {
+        var checkbox = event.target;
+        if (!checkbox.classList.contains('producto-seleccionado')) {
+            var fila = event.target.closest('tr');
+            checkbox = fila ? fila.querySelector('.producto-seleccionado') : null;
+            if (!checkbox) {
+                return;
+            }
+            checkbox.checked = !checkbox.checked;
+        }
+
+        actualizarSeleccionProductoVisual(checkbox);
+    });
+
+    cuerpoTabla.dataset.listenerAttached = 'true';
+}
+
+function actualizarSeleccionProductoVisual(checkbox) {
+    if (!checkbox) {
+        return;
+    }
+
+    var fila = checkbox.closest('tr');
+    if (fila) {
+        if (checkbox.checked) {
+            fila.classList.add('info');
+        } else {
+            fila.classList.remove('info');
+        }
+    }
+}
+
+function seleccionarTodosProductos(checked) {
+    var checkboxes = document.querySelectorAll('#listprod .producto-seleccionado');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.checked = checked;
+        actualizarSeleccionProductoVisual(checkbox);
+    });
+}
+
+function agregarProductosSeleccionados() {
+    var seleccionados = document.querySelectorAll('#listprod .producto-seleccionado:checked');
+    if (!seleccionados.length) {
+        alertSwal('Seleccione al menos un producto', 'warning');
+        return;
+    }
+
+    var cantidadInput = document.getElementById('cantidad');
+    var cantidadBase = cantidadInput && parseFloat(cantidadInput.value) > 0 ? cantidadInput.value : 1;
+
+    seleccionados.forEach(function(checkbox) {
+        var codigo = checkbox.dataset.codigo || '';
+        var nombre = checkbox.dataset.nombre || '';
+        var costo = checkbox.dataset.costo || 0;
+
+        var codigoProducto = document.getElementById('codigo_producto');
+        var nombreProducto = document.getElementById('producto');
+        var costoProducto = document.getElementById('costo');
+
+        if (codigoProducto) {
+            codigoProducto.value = codigo;
+        }
+        if (nombreProducto) {
+            nombreProducto.value = nombre;
+        }
+        if (costoProducto) {
+            costoProducto.value = costo;
+        }
+        if (cantidadInput) {
+            cantidadInput.value = cantidadBase;
+        }
+
+        cargar_producto();
+    });
+
+    cerrarModal();
 }
 
 
