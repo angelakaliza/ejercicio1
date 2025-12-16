@@ -2703,7 +2703,7 @@
             const contenedorProducto = document.getElementById('camposProductoEstandar');
             const slotCantidadRegistrado = document.getElementById('slotCantidadRegistrado');
             const slotCantidadNoRegistrado = document.getElementById('slotCantidadNoRegistrado');
-            const contenedorCantidad = document.getElementById('wrapperCantidad');
+            const contenedorCantidad = document.getElementById('contenedorCantidadUnidad');
             const slotArchivoPrincipal = document.getElementById('slotArchivoPrincipal');
             const slotArchivoDetalle = document.getElementById('slotArchivoDetalle');
             const contenedorArchivo = document.getElementById('wrapperArchivo');
@@ -2882,10 +2882,11 @@
             document.getElementById("costo").value = 0;
             document.getElementById("codigo_producto").value = '';
             document.getElementById("detalle").value = '';
-            if (document.getElementById("unidad")) {
-                document.getElementById("unidad").selectedIndex = 0;
-            }
             document.getElementById("archivo").value = '';
+            const unidad = document.getElementById('unidad');
+            if (unidad) {
+                unidad.selectedIndex = 0;
+            }
             const productoNoRegistrado = document.getElementById('producto_no_registrado');
             if (productoNoRegistrado && productoNoRegistrado.checked) {
                 productoNoRegistrado.checked = false;
@@ -2961,8 +2962,8 @@
             xajax_actualiza_grid(id, xajax.getFormValues("form1"));
         }
 
-        function cargar_update_grid(id, producto, cantidad, bode, costo, ccos, detalle) {
-            xajax_agrega_modifica_grid(1, 0, producto, xajax.getFormValues("form1"), id, cantidad, bode, costo, ccos, detalle);
+        function cargar_update_grid(id, producto, cantidad, bode, costo, ccos, detalle, unidad) {
+            xajax_agrega_modifica_grid(1, 0, producto, xajax.getFormValues("form1"), id, cantidad, bode, costo, ccos, detalle, unidad);
         }
 
         function cargar_grid() {
@@ -3146,6 +3147,7 @@
             if (codigoProducto) {
                 codigoProducto.readOnly = true;
                 codigoProducto.classList.add('solo-lectura');
+                codigoProducto.addEventListener('blur', solicitarUnidadProductoPorDefecto);
             }
 
             if (nombreProducto) {
@@ -3159,9 +3161,38 @@
             const bodegaSelect = document.getElementById('bodega');
             if (bodegaSelect) {
                 bodegaSelect.addEventListener('change', actualizarInfoBodegaNoRegistrado);
+                bodegaSelect.addEventListener('change', solicitarUnidadProductoPorDefecto);
             }
 
             actualizarInfoBodegaNoRegistrado();
+        }
+
+        function solicitarUnidadProductoPorDefecto() {
+            if (esProductoNoRegistrado()) {
+                return;
+            }
+
+            const codigoProducto = document.getElementById('codigo_producto');
+            const empresa = document.getElementById('empresa');
+            const sucursal = document.getElementById('sucursal');
+            const bodega = document.getElementById('bodega');
+
+            if (!codigoProducto || !empresa || !sucursal || !bodega) {
+                return;
+            }
+
+            if (!codigoProducto.value || !empresa.value || !sucursal.value || !bodega.value) {
+                return;
+            }
+
+            xajax_obtener_unidad_producto(codigoProducto.value, empresa.value, sucursal.value, bodega.value);
+        }
+
+        function seleccionarUnidadProducto(unidadId) {
+            const unidadSelect = document.getElementById('unidad');
+            if (unidadSelect && unidadId) {
+                unidadSelect.value = unidadId;
+            }
         }
 
         function cargar_portafolio(empresa, sucursal) {
