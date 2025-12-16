@@ -7544,6 +7544,9 @@ function buscar_productos($aForm = '')
 function genera_gridTMP($aData = null, $aLabel = null, $sTitulo = 'Reporte', $iAncho = '400', $aAccion = null, $Totales = null, $aOrden = null)
 {
     if (is_array($aData) && is_array($aLabel)) {
+        $aLabel = array_values(array_filter($aLabel, function ($label) {
+            return $label !== 'Total';
+        }));
         $iLabel = count($aLabel);
         $iData = count($aData);
         $sClass = 'on';
@@ -7637,6 +7640,9 @@ function genera_gridTMP($aData = null, $aLabel = null, $sTitulo = 'Reporte', $iA
 function genera_grid($aData = null, $aLabel = null, $sTitulo = 'Reporte', $iAncho = '400', $aAccion = null, $Totales = null, $aOrden = null)
 {
     if (is_array($aData) && is_array($aLabel)) {
+        $aLabel = array_values(array_filter($aLabel, function ($label) {
+            return $label !== 'Total';
+        }));
         $iLabel = count($aLabel);
         $iData = count($aData);
         $sClass = 'on';
@@ -8504,40 +8510,26 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                             </div>
 
                             <div class="row fila-producto" id="filaProductoRegistrado">
-                                <div class="col-xs-12 col-sm-4 col-md-3" id="columnaBodega">
+                                <div class="col-xs-12 col-sm-3" id="columnaBodega">
                                     <div class="form-group">' . $ifu->ObjetoHtmlLBL('bodega') . $ifu->ObjetoHtml('bodega') . '</div>
                                 </div>
-                                <div class="col-xs-12 col-sm-8 col-md-5" id="camposProductoEstandar">
-                                    <div class="row">
-                                        <div class="col-xs-12 col-sm-7">
-                                            <div class="form-group">' . $ifu->ObjetoHtmlLBL('producto') . '
-                                                <div class="input-group">
-                                                    ' . $ifu->ObjetoHtml('producto') . '
-                                                    <span class="input-group-btn">
-                                                        <button id="botonBuscarProducto" class="btn btn-primary btn-sm" title="Buscar" type="button" value="Buscar Producto" onClick="javascript:cargar_prod_nom(2)">
-                                                            <i class="glyphicon glyphicon-search"></i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-5">
-                                            <div class="form-group">' . $ifu->ObjetoHtmlLBL('codigo_producto') . $ifu->ObjetoHtml('codigo_producto') . '</div>
+                                <div class="col-xs-12 col-sm-4" id="camposProductoEstandar">
+                                    <div class="form-group">' . $ifu->ObjetoHtmlLBL('producto') . '
+                                        <div class="input-group">
+                                            ' . $ifu->ObjetoHtml('producto') . '
+                                            <span class="input-group-btn">
+                                                <button id="botonBuscarProducto" class="btn btn-primary btn-sm" title="Buscar" type="button" value="Buscar Producto" onClick="javascript:cargar_prod_nom(2)">
+                                                    <i class="glyphicon glyphicon-search"></i>
+                                                </button>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" id="slotCantidadRegistrado">
-                                    <div id="contenedorCantidadUnidad" class="row">
-                                        <div class="col-xs-12">
-                                            <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
-                                        </div>
-                                        <div class="col-xs-12">
-                                            <div class="form-group" id="wrapperUnidad">' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '</div>
-                                        </div>
-                                    </div>
+                                <div class="col-xs-12 col-sm-2">
+                                    <div class="form-group">' . $ifu->ObjetoHtmlLBL('codigo_producto') . $ifu->ObjetoHtml('codigo_producto') . '</div>
                                 </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" id="slotArchivoPrincipal">
-                                    <div class="form-group" id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
+                                <div class="col-xs-12 col-sm-3" id="slotCantidadRegistrado">
+                                    <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
                                 </div>
                                 <div class="col-xs-12" style="display:none;">
                                     ' . $ifu->ObjetoHtml('costo') . '
@@ -8545,39 +8537,50 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                             </div>
 
                             <div class="row fila-producto" id="filaProductoNoRegistrado" style="display:none;">
-                                <div class="col-xs-12 col-sm-4 col-md-3" id="camposProductoNoRegistrado">
+                                <div class="col-xs-12 col-sm-4" id="camposProductoNoRegistrado">
                                     <div class="form-group">
                                         <label for="codigo_auxiliar">Codigo auxiliar</label>
                                         <input type="text" class="form-control" id="codigo_auxiliar" name="codigo_auxiliar" maxlength="50" placeholder="Ingrese codigo auxiliar">
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-5 col-md-5">
+                                <div class="col-xs-12 col-sm-4">
                                     <div class="form-group">
                                         <label for="descripcion_auxiliar">Nombre</label>
                                         <input type="text" class="form-control" id="descripcion_auxiliar" name="descripcion_auxiliar" maxlength="150" placeholder="Describa el producto no registrado">
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-3 col-md-2" id="slotCantidadNoRegistrado"></div>
+                                <div class="col-xs-12 col-sm-4" id="slotCantidadNoRegistrado"></div>
                                 <div class="col-xs-12">
                                     <p class="help-block" id="infoBodegaNoRegistrado" style="display:none;"></p>
                                 </div>
                             </div>
 
                             <div class="row fila-producto" id="filaDetalleProducto">
-                                <div class="col-xs-12 col-sm-7 col-md-7">
+                                <div class="col-xs-12 col-sm-6">
                                     <div class="form-group">
                                         ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-3 col-md-3 slot-archivo-vacio" id="slotArchivoDetalle"></div>
-                                <div class="col-xs-12 col-sm-2 col-md-2 detalle-acciones">
-                                    <button class="btn btn-success btn-block btn-agregar-producto"
-                                            title="Agregar"
-                                            type="button"
-                                            value="Agregar Producto"
-                                            onClick="javascript:cargar_producto( )">
-                                        <i class="glyphicon glyphicon-plus"></i> Agregar
-                                    </button>
+                                <div class="col-xs-12 col-sm-3" id="columnaUnidad">
+                                    <div class="form-group" id="slotUnidadRegistrado">
+                                        <div id="wrapperUnidad">' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '</div>
+                                    </div>
+                                    <div class="form-group" id="slotUnidadNoRegistrado" style="display:none;"></div>
+                                </div>
+                                <div class="col-xs-12 col-sm-3" id="columnaArchivos">
+                                    <div id="slotArchivoPrincipal">
+                                        <div class="form-group" id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
+                                    </div>
+                                    <div class="slot-archivo-vacio" id="slotArchivoDetalle"></div>
+                                    <div class="detalle-acciones" style="margin-top:10px;">
+                                        <button class="btn btn-success btn-block btn-agregar-producto"
+                                                title="Agregar"
+                                                type="button"
+                                                value="Agregar Producto"
+                                                onClick="javascript:cargar_producto( )">
+                                            <i class="glyphicon glyphicon-plus"></i> Agregar
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
