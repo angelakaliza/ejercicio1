@@ -8544,36 +8544,46 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-3 col-md-4" id="slotCantidadNoRegistrado"></div>
-                                <div class="col-xs-12">
-                                    <p class="help-block" id="infoBodegaNoRegistrado" style="display:none;"></p>
-                                </div>
+                               
                             </div>
 
+                           
+
+
                             <div class="row fila-producto" id="filaDetalleProducto">
-                                <div class="col-xs-12 col-sm-7 col-md-7">
-                                    <div class="form-group">
-                                        ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-3 col-md-3" id="slotUnidadRegistrado">
-                                    <div class="form-group" id="contenedorUnidad">' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '</div>
-                                </div>
-                                <div class="col-xs-12 col-sm-2 col-md-2" id="columnaArchivoAcciones">
-                                    <div class="form-group" id="slotArchivoPrincipal">
-                                        <div id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
-                                    </div>
-                                    <div class="slot-archivo-vacio" id="slotArchivoDetalle"></div>
-                                    <div class="detalle-acciones">
-                                        <button class="btn btn-success btn-block btn-agregar-producto"
-                                                title="Agregar"
-                                                type="button"
-                                                value="Agregar Producto"
-                                                onClick="javascript:cargar_producto( )">
-                                            <i class="glyphicon glyphicon-plus"></i> Agregar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+    <div class="col-xs-12 col-sm-7 col-md-7">
+        <div class="form-group">
+            ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
+        </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-3 col-md-3" id="slotUnidadRegistrado">
+        <div class="form-group" id="contenedorUnidad">
+            ' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '
+        </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-2 col-md-2">
+        <div class="form-group" id="slotArchivoPrincipal">
+            <div id="wrapperArchivo">
+                ' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '
+                <small class="help-block">Cargar por archivo</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row fila-producto">
+    <div class="col-xs-12 text-right">
+        <button class="btn btn-success btn-lg btn-agregar-producto"
+                type="button"
+                onclick="cargar_producto();">
+            <i class="glyphicon glyphicon-plus"></i> Agregar
+        </button>
+    </div>
+</div>
+
+
 
 
                         </div>
@@ -10045,7 +10055,7 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
 
             // detalle
             $detalleCampo = restaurar_saltos_linea_guardados($detalle);
-            $fu->AgregarCampoTexto($id . '_det', 'Detalle', false, $detalleCampo, 100, 100, true);
+            $fu->AgregarCampoTexto($id . '_det', 'Uso y Detalle', false, $detalleCampo, 100, 100, true);
 
 
             // busqueda
