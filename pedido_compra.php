@@ -2703,7 +2703,9 @@
             const contenedorProducto = document.getElementById('camposProductoEstandar');
             const slotCantidadRegistrado = document.getElementById('slotCantidadRegistrado');
             const slotCantidadNoRegistrado = document.getElementById('slotCantidadNoRegistrado');
-            const contenedorCantidad = document.getElementById('contenedorCantidadUnidad');
+            const contenedorCantidad = document.getElementById('contenedorCantidad');
+            const contenedorUnidad = document.getElementById('contenedorUnidad');
+            const slotUnidadRegistrado = document.getElementById('slotUnidadRegistrado');
             const slotArchivoPrincipal = document.getElementById('slotArchivoPrincipal');
             const slotArchivoDetalle = document.getElementById('slotArchivoDetalle');
             const contenedorArchivo = document.getElementById('wrapperArchivo');
@@ -2755,6 +2757,9 @@
                 if (codigoAuxiliar) {
                     codigoAuxiliar.readOnly = false;
                 }
+                if (slotUnidadRegistrado && contenedorUnidad) {
+                    moverElemento(contenedorUnidad, slotUnidadRegistrado);
+                }
                 generarCodigoAuxiliarAuto();
             } else {
                 if (producto) {
@@ -2794,6 +2799,9 @@
                 }
                 if (codigoAuxiliar) {
                     codigoAuxiliar.readOnly = false;
+                }
+                if (slotUnidadRegistrado && contenedorUnidad) {
+                    moverElemento(contenedorUnidad, slotUnidadRegistrado);
                 }
             }
 
