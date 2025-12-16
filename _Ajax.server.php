@@ -8504,40 +8504,26 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                             </div>
 
                             <div class="row fila-producto" id="filaProductoRegistrado">
-                                <div class="col-xs-12 col-sm-4 col-md-3" id="columnaBodega">
+                                <div class="col-xs-12 col-sm-3 col-md-3" id="columnaBodega">
                                     <div class="form-group">' . $ifu->ObjetoHtmlLBL('bodega') . $ifu->ObjetoHtml('bodega') . '</div>
                                 </div>
-                                <div class="col-xs-12 col-sm-8 col-md-5" id="camposProductoEstandar">
-                                    <div class="row">
-                                        <div class="col-xs-12 col-sm-7">
-                                            <div class="form-group">' . $ifu->ObjetoHtmlLBL('producto') . '
-                                                <div class="input-group">
-                                                    ' . $ifu->ObjetoHtml('producto') . '
-                                                    <span class="input-group-btn">
-                                                        <button id="botonBuscarProducto" class="btn btn-primary btn-sm" title="Buscar" type="button" value="Buscar Producto" onClick="javascript:cargar_prod_nom(2)">
-                                                            <i class="glyphicon glyphicon-search"></i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-5">
-                                            <div class="form-group">' . $ifu->ObjetoHtmlLBL('codigo_producto') . $ifu->ObjetoHtml('codigo_producto') . '</div>
+                                <div class="col-xs-12 col-sm-5 col-md-4" id="camposProductoEstandar">
+                                    <div class="form-group">' . $ifu->ObjetoHtmlLBL('producto') . '
+                                        <div class="input-group">
+                                            ' . $ifu->ObjetoHtml('producto') . '
+                                            <span class="input-group-btn">
+                                                <button id="botonBuscarProducto" class="btn btn-primary btn-sm" title="Buscar" type="button" value="Buscar Producto" onClick="javascript:cargar_prod_nom(2)">
+                                                    <i class="glyphicon glyphicon-search"></i>
+                                                </button>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" id="slotCantidadRegistrado">
-                                    <div id="contenedorCantidadUnidad" class="row">
-                                        <div class="col-xs-12">
-                                            <div class="form-group" id="wrapperCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
-                                        </div>
-                                        <div class="col-xs-12">
-                                            <div class="form-group" id="wrapperUnidad">' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '</div>
-                                        </div>
-                                    </div>
+                                <div class="col-xs-12 col-sm-4 col-md-3" id="columnaCodigoProducto">
+                                    <div class="form-group">' . $ifu->ObjetoHtmlLBL('codigo_producto') . $ifu->ObjetoHtml('codigo_producto') . '</div>
                                 </div>
-                                <div class="col-xs-12 col-sm-4 col-md-2" id="slotArchivoPrincipal">
-                                    <div class="form-group" id="wrapperArchivo">' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '<small class="help-block">Cargar por archivo</small></div>
+                                <div class="col-xs-12 col-sm-2 col-md-2" id="slotCantidadRegistrado">
+                                    <div class="form-group" id="contenedorCantidad">' . $ifu->ObjetoHtmlLBL('cantidad') . $ifu->ObjetoHtml('cantidad') . '</div>
                                 </div>
                                 <div class="col-xs-12" style="display:none;">
                                     ' . $ifu->ObjetoHtml('costo') . '
@@ -8545,41 +8531,59 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                             </div>
 
                             <div class="row fila-producto" id="filaProductoNoRegistrado" style="display:none;">
-                                <div class="col-xs-12 col-sm-4 col-md-3" id="camposProductoNoRegistrado">
+                                <div class="col-xs-12 col-sm-4 col-md-4" id="camposProductoNoRegistrado">
                                     <div class="form-group">
                                         <label for="codigo_auxiliar">Codigo auxiliar</label>
                                         <input type="text" class="form-control" id="codigo_auxiliar" name="codigo_auxiliar" maxlength="50" placeholder="Ingrese codigo auxiliar">
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-5 col-md-5">
+                                <div class="col-xs-12 col-sm-5 col-md-4">
                                     <div class="form-group">
                                         <label for="descripcion_auxiliar">Nombre</label>
                                         <input type="text" class="form-control" id="descripcion_auxiliar" name="descripcion_auxiliar" maxlength="150" placeholder="Describa el producto no registrado">
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-3 col-md-2" id="slotCantidadNoRegistrado"></div>
-                                <div class="col-xs-12">
-                                    <p class="help-block" id="infoBodegaNoRegistrado" style="display:none;"></p>
-                                </div>
+                                <div class="col-xs-12 col-sm-3 col-md-4" id="slotCantidadNoRegistrado"></div>
+                               
                             </div>
 
+                           
+
+
                             <div class="row fila-producto" id="filaDetalleProducto">
-                                <div class="col-xs-12 col-sm-7 col-md-7">
-                                    <div class="form-group">
-                                        ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-3 col-md-3 slot-archivo-vacio" id="slotArchivoDetalle"></div>
-                                <div class="col-xs-12 col-sm-2 col-md-2 detalle-acciones">
-                                    <button class="btn btn-success btn-block btn-agregar-producto"
-                                            title="Agregar"
-                                            type="button"
-                                            value="Agregar Producto"
-                                            onClick="javascript:cargar_producto( )">
-                                        <i class="glyphicon glyphicon-plus"></i> Agregar
-                                    </button>
-                                </div>
-                            </div>
+    <div class="col-xs-12 col-sm-7 col-md-7">
+        <div class="form-group">
+            ' . $ifu->ObjetoHtmlLBL('detalle') . $ifu->ObjetoHtml('detalle') . '
+        </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-3 col-md-3" id="slotUnidadRegistrado">
+        <div class="form-group" id="contenedorUnidad">
+            ' . $ifu->ObjetoHtmlLBL('unidad') . $ifu->ObjetoHtml('unidad') . '
+        </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-2 col-md-2">
+        <div class="form-group" id="slotArchivoPrincipal">
+            <div id="wrapperArchivo">
+                ' . $ifu->ObjetoHtmlLBL('archivo') . $ifu->ObjetoHtml('archivo') . '
+                <small class="help-block">Cargar por archivo</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row fila-producto">
+    <div class="col-xs-12 text-right">
+        <button class="btn btn-success btn-lg btn-agregar-producto"
+                type="button"
+                onclick="cargar_producto();">
+            <i class="glyphicon glyphicon-plus"></i> Agregar
+        </button>
+    </div>
+</div>
+
+
 
 
                         </div>
@@ -10051,7 +10055,7 @@ function agrega_modifica_grid($nTipo = 0, $descuento_general = 0, $codigo_prod =
 
             // detalle
             $detalleCampo = restaurar_saltos_linea_guardados($detalle);
-            $fu->AgregarCampoTexto($id . '_det', 'Detalle', false, $detalleCampo, 100, 100, true);
+            $fu->AgregarCampoTexto($id . '_det', 'Uso y Detalle', false, $detalleCampo, 100, 100, true);
 
 
             // busqueda
@@ -10179,7 +10183,7 @@ function actualiza_grid($id, $aForm)
     $bodega = $aDataGrid[$id]['Bodega'];
     $centro_costo = $aForm[$id . '_ccos'];
     $detalle = $aForm[$id . '_det'];
-    $unidadSeleccionada = $aDataGrid[$id]['Unidad'];
+    $unidadSeleccionada = isset($aForm[$id . '_unidad']) ? $aForm[$id . '_unidad'] : $aDataGrid[$id]['Unidad'];
     $oReturn->script('cargar_update_grid(\'' . $id . '\', \'' . $producto . '\', \'' . $cantidad . '\' , \'' . $bodega . '\', \'' . $costo . '\', \'' . $centro_costo . '\', \'' . $detalle . '\', \'' . $unidadSeleccionada . '\'  )');
     return $oReturn;
 }
@@ -10317,6 +10321,21 @@ function mostrar_grid($idempresa)
     $aDataGrid = $_SESSION['aDataGird'];
     $aLabelGrid = array('Eliminar', 'Bodega', 'Producto auxiliar (SI/No)', 'Codigo Item', 'Descripcion', 'Unidad', 'Cantidad Tmp', 'Costo Tmp', 'Cantidad', 'Detalle', 'Archivo');
 
+    $unidadesDisponibles = array();
+    $sqlUnidades = 'select unid_cod_unid, unid_sigl_unid from saeunid where unid_cod_empr = ? order by unid_sigl_unid';
+    if ($oIfx->Query($sqlUnidades, array($idempresa))) {
+        if ($oIfx->NumFilas() > 0) {
+            do {
+                $codigoUnidad = $oIfx->f('unid_cod_unid');
+                $siglaUnidad = $oIfx->f('unid_sigl_unid');
+                if (!empty($codigoUnidad)) {
+                    $unidadesDisponibles[$codigoUnidad] = $siglaUnidad;
+                }
+            } while ($oIfx->SiguienteRegistro());
+        }
+    }
+    $oIfx->Free();
+
     $cont = 0;
     foreach ($aDataGrid as $aValues) {
         $cod_prod = $aValues['Codigo Item'];
@@ -10354,13 +10373,17 @@ function mostrar_grid($idempresa)
         }
         $aDatos[$cont]['Descripcion'] = $producto;
 
-        $sql = 'select unid_sigl_unid from saeunid where unid_cod_empr = ' . $idempresa . ' and unid_cod_unid = ? ';
-        $data = array($unidadId);
-        $unidad = '';
-        if ($oIfx->Query($sql, $data))
-            $unidad = $oIfx->f('unid_sigl_unid');
-        $oIfx->Free();
-        $aDatos[$cont]['Unidad'] = $unidad;
+        $unidadSelectName = $cont . '_unidad';
+        $unidadSelect = '<select class="form-control input-sm" name="' . $unidadSelectName . '" id="' . $unidadSelectName . '" onchange="cargar_update_cant(\'' . $cont . '\');">';
+        if (!empty($unidadId) && !isset($unidadesDisponibles[$unidadId])) {
+            $unidadSelect .= '<option value="' . htmlspecialchars($unidadId, ENT_QUOTES, 'UTF-8') . '" selected>' . htmlspecialchars($unidadId, ENT_QUOTES, 'UTF-8') . '</option>';
+        }
+        foreach ($unidadesDisponibles as $idUnidad => $siglaUnidad) {
+            $selected = ($idUnidad == $unidadId) ? ' selected' : '';
+            $unidadSelect .= '<option value="' . htmlspecialchars($idUnidad, ENT_QUOTES, 'UTF-8') . '"' . $selected . '>' . htmlspecialchars($siglaUnidad, ENT_QUOTES, 'UTF-8') . '</option>';
+        }
+        $unidadSelect .= '</select>';
+        $aDatos[$cont]['Unidad'] = $unidadSelect;
 
         $aDatos[$cont]['Cantidad Tmp'] = '<div align="right">' . $aValues['Cantidad Tmp'] . '</div>';
         $aDatos[$cont]['Costo Tmp'] = '<div align="right">' . $aValues['Costo Tmp'] . '</div>';
