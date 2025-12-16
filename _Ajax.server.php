@@ -7417,11 +7417,20 @@ function buscar_productos($aForm = '')
         Buscador de Productos
     </div>
             <div class="panel-body">
+                <div class="row" style="margin-bottom: 10px;">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="text" id="buscadorProductosModal" class="form-control" placeholder="Buscar productos">
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
 
     <table id="listprod"  class="table table-striped table-condensed table-bordered table-hover" style="width: 100%; margin-top: 20px;" align="center">';
     $sHtml .= '<thead>';
     $sHtml .= ' <tr>
+    <th align="center" bgcolor="#EBF0FA"><input type="checkbox" id="seleccionarTodoProductos" onclick="seleccionarTodosProductos(this.checked);"></th>
     <th align="left" bgcolor="#EBF0FA">Id</th>
     <th align="left" bgcolor="#EBF0FA">C&oacute;digo</th>
     <th align="left" bgcolor="#EBF0FA">Descripci&oacute;n</th>
@@ -7501,8 +7510,9 @@ function buscar_productos($aForm = '')
 
 
 
-                $onclik = "datos_prod('$codigo','$nombre',$costo)";
-                $sHtml .= '<tr onclick="' . $onclik . '">
+                $checkboxId = 'prod_sel_' . $cont;
+                $sHtml .= '<tr>
+                                <td align="center"><input type="checkbox" class="producto-seleccionado" id="' . $checkboxId . '" data-codigo="' . htmlspecialchars($codigo, ENT_QUOTES) . '" data-nombre="' . htmlspecialchars($nombre, ENT_QUOTES) . '" data-costo="' . $costo . '" onchange="actualizarSeleccionProductoVisual(this);"></td>
                                 <td align="center">' . $cont . '</td>
                                 <td >' . $codigo . '</td>
                                 <td>' . $nombre . '</td>
@@ -7527,8 +7537,9 @@ function buscar_productos($aForm = '')
 
     $sHtml .= '          </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="agregarProductosSeleccionados();"><i class="fa fa-plus"></i> Agregar seleccionados</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
-                       
+
                     </div>
                 </div>
             </div>
@@ -10551,81 +10562,13 @@ function cargar_grid($descuento_general, $aForm = '')
 
 function total_grid($aForm = '')
 {
-    //Definiciones
-    global $DSN_Ifx, $DSN;
     if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start();
     }
 
-    $oIfx = new Dbo;
-    $oIfx->DSN = $DSN_Ifx;
-    $oIfx->Conectar();
-
-    $fu = new Formulario;
-    $fu->DSN = $DSN;
-
     $oReturn = new xajaxResponse();
+    $oReturn->assign("divTotal", "");
 
-    $usuario_informix = $_SESSION['U_USER_INFORMIX'];
-    $aDataGrid = $_SESSION['aDataGird'];
-    $contdata = count($aDataGrid);
-    $sucursal = $aForm['sucursal'];
-    $cod_prove = $aForm['cliente'];
-    $cod_tran = $aForm['tran'];
-    $contri = $aForm['contri_prove'];
-    $array_otros = $_SESSION['U_OTROS'];
-
-    $idEmpresa = $_SESSION['U_EMPRESA'];
-
-
-    $sql       = "select pcon_mon_base from saepcon where pcon_cod_empr = $idEmpresa ";
-    $mone_base = consulta_string_func($sql, 'pcon_mon_base', $oIfx, 0);
-
-
-
-
-    $sql_mone = "select mone_smb_mene from saemone
-    where mone_cod_empr = $idEmpresa
-    and mone_cod_mone = $mone_base";
-
-    $sig_mone_prin = consulta_string($sql_mone, 'mone_smb_mene', $oIfx, '$');
-
-
-    if ($contdata > 0) {
-
-        $total = 0;
-        $x = 0;
-        foreach ($aDataGrid as $aValues) {
-            $aux = 0;
-            foreach ($aValues as $aVal) {
-                if ($aux == 9) {      //TOTAL
-                    $cant_costo = $aVal;
-                    $total += $cant_costo;
-                }
-                $aux++;
-            }
-            $x++;
-        } // fin foreach
-
-        $total = round($total, 2);
-        $fu->AgregarCampoNumerico('total_fac', 'Total|left', false, $total, 70, 10, true);
-        $fu->AgregarComandoAlPonerEnfoque('total_fac', 'this.blur()');
-
-        $sHtml .= '<fieldset style="border:#FFFFFF 1px solid; padding:2px; text-align:center; width:95%;">';
-        $sHtml .= '<table align="right" cellpadding="0" cellspacing="2" width="20%" border="0">
-                            <tr>
-                                            <td  bgcolor="#EBEBEB" class="fecha_grande"></td>
-                                            <td class="total_fact"  bgcolor="#EBF0FA" height="25">TOTAL:</td>
-                                            <td  bgcolor="#EBEBEB" class="total_fact" align="right">' . $sig_mone_prin . '</td>
-                                            <td  bgcolor="#EBEBEB" class="total_fact" align="right">' . $fu->ObjetoHtml('total_fac') . '</td>
-                                            <td  bgcolor="#EBEBEB" class="total_fact" align="right"></td>
-                            </tr>';
-        $sHtml .= '</table></fieldset>';
-    } else {
-        $sHtml = "";
-    }
-
-    $oReturn->assign("divTotal", "innerHTML", $sHtml);
     return $oReturn;
 }
 
