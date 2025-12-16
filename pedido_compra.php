@@ -2353,14 +2353,15 @@
                 const checkEnvio = seleccion && seleccion.enviar === false ? '' : 'checked';
                 const sinUsuarios = aprobadoresCargo.length === 0 ? '<p class="text-muted">Sin usuarios registrados para este cargo.</p>' : '';
 
-                const selectorAprobadores = aprobadoresCargo.length ? '<select class="form-control" data-grupo="' + cargo.id + '" ' + (esElaboradoPor ? 'disabled' : '') + ' onchange="actualizarSeleccionAprobador(\'' + cargo.id + '\', this.value);">' + opciones + '</select>' : '';
+                const selectorAprobadores = aprobadoresCargo.length ? '<select class="form-control" data-grupo="' + cargo.id + '" onchange="actualizarSeleccionAprobador(\'' + cargo.id + '\', this.value);">' + opciones + '</select>' : '';
                 const selectorPosicion = '<select class="form-control input-sm" onchange="cambiarPosicionCargo(\'' + cargo.id + '\', parseInt(this.value, 10));">' + opcionesPosicion + '</select>';
+                const estadoEnvio = esElaboradoPor ? 'checked' : checkEnvio;
 
                 tarjeta.innerHTML = '' +
                     '<div class="firma-card__titulo">' +
                         '<h5><i class="fa fa-pencil"></i> ' + descripcionGrupo + '</h5>' +
                         '<label class="firma-card__envio">' +
-                            '<input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + checkEnvio + ' ' + (esElaboradoPor ? 'disabled checked' : '') + '> Incluir' +
+                            '<input type="checkbox" data-grupo="' + cargo.id + '" onchange="actualizarEnvioAprobador(\'' + cargo.id + '\', this.checked);" ' + estadoEnvio + '> Incluir' +
                         '</label>' +
                     '</div>' +
                     (sinUsuarios ? sinUsuarios : '') +

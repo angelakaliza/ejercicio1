@@ -7980,7 +7980,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                 'unidad',
                 'Unidad|left',
                 "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
-                true,
+                false,
                 170,
                 150,
                 true
@@ -8010,7 +8010,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
 
             $oReturn->script('cargar_sucursal();');
 
-            $ifu->AgregarCampoTexto('detalle', 'Detalle|left', false, '', 170, 200, true);
+            $ifu->AgregarCampoTexto('detalle', 'Uso o Detalle|left', false, '', 170, 200, true);
 
             $fu->AgregarCampoListaSQL('tipo', 'Tipo|left', "select tpro_cod_tpro, tpro_des_tpro from saetpro where tpro_cod_empr = $idempresa and tpro_est_sn = 'S' order by tpro_des_tpro", true, 170, 150, true);
 
@@ -8082,7 +8082,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                 'unidad',
                 'Unidad|left',
                 "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
-                true,
+                false,
                 170,
                 150,
                 true
@@ -8118,7 +8118,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
 
             $oReturn->script('cargar_bodega();');
 
-            $ifu->AgregarCampoTexto('detalle', 'Detalle|left', false, '', 170, 200, true);
+            $ifu->AgregarCampoTexto('detalle', 'Uso o Detalle|left', false, '', 170, 200, true);
 
 
             $fu->AgregarCampoListaSQL('tipo', 'Tipo|left', "select tpro_cod_tpro, tpro_des_tpro from saetpro where tpro_cod_empr = $idempresa and tpro_est_sn = 'S' order by tpro_des_tpro", true, 170, 150, true);
@@ -8197,7 +8197,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                 'unidad',
                 'Unidad|left',
                 "select unid_cod_unid, unid_nom_unid from saeunid where unid_cod_empr = $idempresa order by unid_nom_unid",
-                true,
+                false,
                 170,
                 150,
                 true
@@ -8231,7 +8231,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                 $ifu->cCampos["sucursal"]->xValor = $requ_sucu;
             }
 
-            $ifu->AgregarCampoTexto('detalle', 'Detalle|left', false, '', 170, 200, true);
+            $ifu->AgregarCampoTexto('detalle', 'Uso o Detalle|left', false, '', 170, 200, true);
 
             $fu->AgregarCampoListaSQL('tipo', 'Tipo|left', "select tpro_cod_tpro, tpro_des_tpro from saetpro where tpro_cod_empr = $idempresa and tpro_est_sn = 'S' order by tpro_des_tpro", true, 170, 150, true);
 
