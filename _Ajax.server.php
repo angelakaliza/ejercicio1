@@ -7417,11 +7417,20 @@ function buscar_productos($aForm = '')
         Buscador de Productos
     </div>
             <div class="panel-body">
+                <div class="row" style="margin-bottom: 10px;">
+                    <div class="col-sm-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="text" id="buscadorProductosModal" class="form-control" placeholder="Buscar productos">
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
 
     <table id="listprod"  class="table table-striped table-condensed table-bordered table-hover" style="width: 100%; margin-top: 20px;" align="center">';
     $sHtml .= '<thead>';
     $sHtml .= ' <tr>
+    <th align="center" bgcolor="#EBF0FA" style="width: 40px;"><input type="checkbox" id="seleccionarTodosProductosModal"></th>
     <th align="left" bgcolor="#EBF0FA">Id</th>
     <th align="left" bgcolor="#EBF0FA">C&oacute;digo</th>
     <th align="left" bgcolor="#EBF0FA">Descripci&oacute;n</th>
@@ -7501,8 +7510,8 @@ function buscar_productos($aForm = '')
 
 
 
-                $onclik = "datos_prod('$codigo','$nombre',$costo)";
-                $sHtml .= '<tr onclick="' . $onclik . '">
+                $sHtml .= '<tr>
+                                <td align="center"><input type="checkbox" class="producto-seleccion" data-codigo="' . htmlspecialchars($codigo) . '" data-nombre="' . htmlspecialchars($nombre) . '" data-costo="' . htmlspecialchars($costo) . '"></td>
                                 <td align="center">' . $cont . '</td>
                                 <td >' . $codigo . '</td>
                                 <td>' . $nombre . '</td>
@@ -7527,8 +7536,9 @@ function buscar_productos($aForm = '')
 
     $sHtml .= '          </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-success" onclick="agregarProductosSeleccionadosDesdeModal();">Agregar seleccionados</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
-                       
+
                     </div>
                 </div>
             </div>
@@ -7536,7 +7546,7 @@ function buscar_productos($aForm = '')
 
 
     $oReturn->assign("ModalProd", "innerHTML", $sHtml);
-    $oReturn->script("initTabla('listprod')");
+    $oReturn->script("initTabla('listprod'); configurarBuscadorProductosModal(); prepararSeleccionMultipleProductos();");
 
     return $oReturn;
 }
@@ -8593,7 +8603,7 @@ function genera_formulario_pedido($sAccion = 'nuevo', $aForm = '', $cod_sol = 0,
                             </div>
                             <div class="section-card__body section-card__body--spaced">
                                 <div id="divFormularioDetalle"></div>
-                                <div id="divTotal"></div>
+                                <div id="divTotal" style="display: none;"></div>
                                 <div id="divFormularioTotal" class="table-responsive"></div>
                                 <div id="divFormularioDetalle2" class="table-responsive" style="margin-bottom: 120px;"></div>
                             </div>

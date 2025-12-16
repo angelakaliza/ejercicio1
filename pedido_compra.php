@@ -3107,6 +3107,170 @@
             }
         }
 
+        function obtenerDataTableProductosModal() {
+            if (!window.jQuery || !$.fn.DataTable) {
+                return null;
+            }
+
+            return $.fn.DataTable.isDataTable('#listprod') ? $('#listprod').DataTable() : null;
+        }
+
+        function configurarBuscadorProductosModal(reintento) {
+            var tabla = obtenerDataTableProductosModal();
+            var buscador = document.getElementById('buscadorProductosModal');
+            var intentos = typeof reintento === 'number' ? reintento : 0;
+
+            if (!tabla || !buscador) {
+                if (intentos < 5) {
+                    setTimeout(function() { configurarBuscadorProductosModal(intentos + 1); }, 200);
+                }
+                return;
+            }
+
+            buscador.oninput = function() {
+                tabla.search(this.value).draw();
+            };
+        }
+
+        function sincronizarFilaSeleccionProductoModal(evento) {
+            var checkbox = evento && evento.target ? evento.target : null;
+            var fila = checkbox ? checkbox.closest('tr') : null;
+
+            if (!fila) {
+                return;
+            }
+
+            if (checkbox.checked) {
+                fila.classList.add('info');
+            } else {
+                fila.classList.remove('info');
+            }
+
+            actualizarCheckboxSeleccionGeneralProductosModal();
+        }
+
+        function actualizarCheckboxSeleccionGeneralProductosModal() {
+            var seleccionarTodos = document.getElementById('seleccionarTodosProductosModal');
+            var checkboxes = document.querySelectorAll('#listprod .producto-seleccion');
+
+            if (!seleccionarTodos || !checkboxes.length) {
+                return;
+            }
+
+            var seleccionados = Array.prototype.filter.call(checkboxes, function(cb) { return cb.checked; }).length;
+            seleccionarTodos.checked = seleccionados > 0 && seleccionados === checkboxes.length;
+            seleccionarTodos.indeterminate = seleccionados > 0 && seleccionados < checkboxes.length;
+        }
+
+        function prepararSeleccionMultipleProductos(reintento) {
+            var tabla = document.getElementById('listprod');
+            var intentos = typeof reintento === 'number' ? reintento : 0;
+
+            if (!tabla) {
+                if (intentos < 5) {
+                    setTimeout(function() { prepararSeleccionMultipleProductos(intentos + 1); }, 200);
+                }
+                return;
+            }
+
+            var seleccionarTodos = document.getElementById('seleccionarTodosProductosModal');
+            var filas = tabla.querySelectorAll('tbody tr');
+
+            filas.forEach(function(fila) {
+                var checkbox = fila.querySelector('.producto-seleccion');
+                if (!checkbox) {
+                    return;
+                }
+
+                checkbox.removeEventListener('change', sincronizarFilaSeleccionProductoModal);
+                checkbox.addEventListener('change', sincronizarFilaSeleccionProductoModal);
+
+                if (!fila.dataset.listenerSeleccion) {
+                    fila.addEventListener('click', function(evento) {
+                        if (evento.target && evento.target.matches('input, label')) {
+                            return;
+                        }
+
+                        checkbox.checked = !checkbox.checked;
+                        sincronizarFilaSeleccionProductoModal({ target: checkbox });
+                    });
+
+                    fila.dataset.listenerSeleccion = 'true';
+                }
+
+                sincronizarFilaSeleccionProductoModal({ target: checkbox });
+            });
+
+            if (seleccionarTodos && !seleccionarTodos.dataset.listenerAsignado) {
+                seleccionarTodos.addEventListener('change', function() {
+                    var checkboxes = tabla.querySelectorAll('.producto-seleccion');
+                    checkboxes.forEach(function(cb) {
+                        cb.checked = seleccionarTodos.checked;
+                        sincronizarFilaSeleccionProductoModal({ target: cb });
+                    });
+                });
+
+                seleccionarTodos.dataset.listenerAsignado = 'true';
+            }
+
+            if (window.jQuery && !tabla.dataset.listenerDraw) {
+                $('#listprod').on('draw.dt', function() {
+                    prepararSeleccionMultipleProductos();
+                });
+
+                tabla.dataset.listenerDraw = 'true';
+            }
+
+            actualizarCheckboxSeleccionGeneralProductosModal();
+        }
+
+        function agregarProductosSeleccionadosDesdeModal() {
+            var seleccionados = Array.prototype.slice.call(document.querySelectorAll('#listprod .producto-seleccion:checked'));
+
+            if (!seleccionados.length) {
+                alertSwal('Seleccione al menos un producto', 'warning');
+                return;
+            }
+
+            var codigoInput = document.getElementById('codigo_producto');
+            var nombreInput = document.getElementById('producto');
+            var costoInput = document.getElementById('costo');
+            var cantidadInput = document.getElementById('cantidad');
+
+            var agregarSecuencial = function(indice) {
+                if (indice >= seleccionados.length) {
+                    $('#ModalProd').modal('hide');
+                    return;
+                }
+
+                var item = seleccionados[indice];
+
+                if (codigoInput) {
+                    codigoInput.value = item.dataset.codigo || '';
+                }
+
+                if (nombreInput) {
+                    nombreInput.value = item.dataset.nombre || '';
+                }
+
+                if (costoInput) {
+                    costoInput.value = item.dataset.costo || 0;
+                }
+
+                if (cantidadInput) {
+                    cantidadInput.value = 1;
+                }
+
+                cargar_producto();
+
+                setTimeout(function() {
+                    agregarSecuencial(indice + 1);
+                }, 300);
+            };
+
+            agregarSecuencial(0);
+        }
+
         function convertirCampoATextarea(id, filas) {
             const campo = document.getElementById(id);
             if (!campo) {
