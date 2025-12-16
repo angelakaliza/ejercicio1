@@ -2703,7 +2703,10 @@
             const contenedorProducto = document.getElementById('camposProductoEstandar');
             const slotCantidadRegistrado = document.getElementById('slotCantidadRegistrado');
             const slotCantidadNoRegistrado = document.getElementById('slotCantidadNoRegistrado');
-            const contenedorCantidad = document.getElementById('contenedorCantidadUnidad');
+            const slotUnidadRegistrado = document.getElementById('slotUnidadRegistrado');
+            const slotUnidadNoRegistrado = document.getElementById('slotUnidadNoRegistrado');
+            const contenedorCantidad = document.getElementById('wrapperCantidad');
+            const contenedorUnidad = document.getElementById('wrapperUnidad');
             const slotArchivoPrincipal = document.getElementById('slotArchivoPrincipal');
             const slotArchivoDetalle = document.getElementById('slotArchivoDetalle');
             const contenedorArchivo = document.getElementById('wrapperArchivo');
@@ -2740,8 +2743,15 @@
                 if (contenedorProducto) {
                     contenedorProducto.style.display = 'none';
                 }
-                if (slotCantidadNoRegistrado) {
+                if (slotCantidadNoRegistrado && contenedorCantidad) {
                     moverElemento(contenedorCantidad, slotCantidadNoRegistrado);
+                }
+                if (slotUnidadNoRegistrado && contenedorUnidad) {
+                    slotUnidadNoRegistrado.style.display = '';
+                    moverElemento(contenedorUnidad, slotUnidadNoRegistrado);
+                }
+                if (slotUnidadRegistrado) {
+                    slotUnidadRegistrado.style.display = 'none';
                 }
                 if (slotArchivoDetalle) {
                     moverElemento(contenedorArchivo, slotArchivoDetalle);
@@ -2780,8 +2790,15 @@
                 if (filaProductoNoRegistrado) {
                     filaProductoNoRegistrado.style.display = 'none';
                 }
-                if (slotCantidadRegistrado) {
+                if (slotCantidadRegistrado && contenedorCantidad) {
                     moverElemento(contenedorCantidad, slotCantidadRegistrado);
+                }
+                if (slotUnidadRegistrado && contenedorUnidad) {
+                    slotUnidadRegistrado.style.display = '';
+                    moverElemento(contenedorUnidad, slotUnidadRegistrado);
+                }
+                if (slotUnidadNoRegistrado) {
+                    slotUnidadNoRegistrado.style.display = 'none';
                 }
                 if (slotArchivoPrincipal) {
                     moverElemento(contenedorArchivo, slotArchivoPrincipal);
