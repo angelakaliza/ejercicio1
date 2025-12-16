@@ -76,6 +76,45 @@
         .productos-agregados-card td {
             font-size: 13px;
         }
+
+        .tabla-productos-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .productos-agregados-card .table {
+            min-width: 720px;
+        }
+
+        .detalle-texto-grid {
+            white-space: pre-wrap;
+        }
+
+        .detalle-textarea-grid {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .detalle-editando .detalle-texto-grid {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .productos-agregados-card .table {
+                font-size: 12px;
+                min-width: 100%;
+            }
+
+            .productos-agregados-card .table > tbody > tr > td,
+            .productos-agregados-card .table > thead > tr > th {
+                padding: 10px 8px;
+            }
+
+            .tabla-productos-wrapper {
+                margin: 0 -8px;
+                padding: 0 8px;
+            }
+        }
     </style>
 
 
@@ -3175,6 +3214,74 @@
             actualizarInfoBodegaNoRegistrado();
         }
 
+        function inicializarEdicionDetalleProductos() {
+            const contenedor = document.querySelector('.tabla-productos-wrapper');
+            if (!contenedor) {
+                return;
+            }
+
+            contenedor.addEventListener('dblclick', function(event) {
+                const detalleDiv = event.target.closest('.detalle-texto-grid');
+                const celda = event.target.closest('td');
+
+                if (!detalleDiv || !celda) {
+                    return;
+                }
+
+                if (celda.classList.contains('detalle-editando')) {
+                    return;
+                }
+
+                const inputOculto = celda.querySelector('input[id$="_det"]');
+                if (!inputOculto) {
+                    return;
+                }
+
+                const valorActual = inputOculto.value || '';
+                const textarea = document.createElement('textarea');
+                textarea.className = 'form-control detalle-textarea-grid';
+                textarea.value = valorActual.replace(/\r?\n/g, '\n');
+
+                celda.classList.add('detalle-editando');
+                celda.insertBefore(textarea, inputOculto);
+                detalleDiv.remove();
+                textarea.focus();
+
+                const restaurarDetalle = () => {
+                    const nuevoDetalle = textarea.value || '';
+                    inputOculto.value = nuevoDetalle;
+                    const nuevoDiv = document.createElement('div');
+                    nuevoDiv.className = 'detalle-texto-grid';
+                    nuevoDiv.innerHTML = nuevoDetalle.replace(/\n/g, '<br>');
+                    celda.insertBefore(nuevoDiv, inputOculto);
+                    textarea.remove();
+                    celda.classList.remove('detalle-editando');
+
+                    const filaId = inputOculto.id.replace('_det', '');
+                    if (typeof xajax_actualiza_grid === 'function') {
+                        xajax_actualiza_grid(filaId, xajax.getFormValues("form1"));
+                    }
+                };
+
+                const cancelarEdicion = () => {
+                    celda.insertBefore(detalleDiv, inputOculto);
+                    textarea.remove();
+                    celda.classList.remove('detalle-editando');
+                };
+
+                textarea.addEventListener('blur', restaurarDetalle);
+                textarea.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        restaurarDetalle();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelarEdicion();
+                    }
+                });
+            });
+        }
+
         function solicitarUnidadProductoPorDefecto() {
             if (esProductoNoRegistrado()) {
                 return;
@@ -4396,6 +4503,7 @@ function agregarProductosSeleccionados() {
             inicializarAccesosRapidosProducto();
             configurarCamposMultilinea();
             configurarCamposProducto();
+            inicializarEdicionDetalleProductos();
         });
         genera_formulario(); /*genera_detalle();genera_form_detalle();*/
     </script>
