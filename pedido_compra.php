@@ -76,6 +76,30 @@
         .productos-agregados-card td {
             font-size: 13px;
         }
+
+        .productos-agregados-card .section-card__body {
+            overflow-x: auto;
+        }
+
+        .productos-agregados-card table {
+            min-width: 720px;
+        }
+
+        .productos-agregados-card .detalle-texto-grid {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .detalle-editor-inline {
+            margin-top: 6px;
+            resize: vertical;
+        }
+
+        @media (max-width: 768px) {
+            .productos-agregados-card table {
+                min-width: 600px;
+            }
+        }
     </style>
 
 
@@ -3203,6 +3227,92 @@
             }
         }
 
+        function inicializarEditorDetalleProductos() {
+            document.addEventListener('dblclick', function(event) {
+                const contenedorDetalle = buscarContenedorDetalle(event.target);
+                if (contenedorDetalle) {
+                    mostrarEditorDetalle(contenedorDetalle);
+                }
+            });
+        }
+
+        function buscarContenedorDetalle(elemento) {
+            if (!elemento) {
+                return null;
+            }
+
+            const contenedorDirecto = elemento.closest('.detalle-texto-grid');
+            if (contenedorDirecto && contenedorDirecto.closest('#divFormularioDetalle')) {
+                return contenedorDirecto;
+            }
+
+            const celdaDetalle = elemento.closest('#divFormularioDetalle td');
+            if (celdaDetalle) {
+                const contenedorCelda = celdaDetalle.querySelector('.detalle-texto-grid');
+                if (contenedorCelda) {
+                    return contenedorCelda;
+                }
+            }
+
+            return null;
+        }
+
+        function mostrarEditorDetalle(contenedor) {
+            const celda = contenedor.closest('td');
+            if (!celda || celda.querySelector('.detalle-editor-inline')) {
+                return;
+            }
+
+            const campoOculto = celda.querySelector('input[type="hidden"][id$="_det"]');
+            const detallePlano = campoOculto ? campoOculto.value : contenedor.textContent;
+
+            const editor = document.createElement('textarea');
+            editor.className = 'form-control detalle-editor-inline';
+            editor.value = detallePlano.replace(/\r?\n/g, '\n');
+
+            contenedor.style.display = 'none';
+            celda.appendChild(editor);
+            editor.focus();
+
+            editor.addEventListener('blur', function() {
+                guardarDetalleEditado(editor, contenedor, campoOculto);
+            });
+
+            editor.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    editor.blur();
+                }
+            });
+        }
+
+        function guardarDetalleEditado(editor, contenedor, campoOculto) {
+            const nuevoDetalle = editor.value || '';
+
+            if (campoOculto) {
+                campoOculto.value = nuevoDetalle;
+            }
+
+            contenedor.innerHTML = convertirTextoADisplaySeguro(nuevoDetalle);
+            contenedor.style.display = '';
+            editor.remove();
+        }
+
+        function convertirTextoADisplaySeguro(texto) {
+            if (texto === undefined || texto === null) {
+                return '';
+            }
+
+            const escapado = texto
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+
+            return escapado.replace(/\n/g, '<br>');
+        }
+
         function cargar_portafolio(empresa, sucursal) {
             var cliente = document.getElementById("cliente").value;
             if (cliente != '') {
@@ -4396,6 +4506,7 @@ function agregarProductosSeleccionados() {
             inicializarAccesosRapidosProducto();
             configurarCamposMultilinea();
             configurarCamposProducto();
+            inicializarEditorDetalleProductos();
         });
         genera_formulario(); /*genera_detalle();genera_form_detalle();*/
     </script>
